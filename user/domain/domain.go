@@ -1,0 +1,55 @@
+package domain
+
+import (
+	"time"
+)
+
+// Db Structures
+type Users struct {
+	ID         uint      `gorm:"primaryKey"`
+	CreateAt   time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
+	Username   string    `gorm:"index; NOT NULL; unique"`
+	Email      string    `gorm:"NOT NULL"`
+	Password   string    `gorm:"NOT NULL"`
+	Is_admin   bool      `gorm:"NOT NULL; default:false"`
+	Is_Premium bool      `gorm:"NOT NULL; default:false"`
+	Is_active  bool      `gorm:"NOT NULL; default:true"`
+}
+
+type Profiles struct {
+	ID          uint   `gorm:"primaryKey"`
+	UserID      uint   `gorm:"foreignKey:UserID"`
+	Name        string `gorm:"default:USER"`
+	Profile_img string `gorm:""`
+	Bio         string `gorm:""`
+	City        string `gorm:""`
+	Github      string `gorm:""`
+	Linkedin    string `gorm:""`
+}
+
+type Badges struct {
+	ID        uint   `gorm:"primaryKey"`
+	BadgeImg  uint   `gorm:"foreignKey:UserID; NOT NULL"`
+	Name      uint   `gorm:"NOT NULL"`
+	ShortDisc string `gorm:"NOT NULL"`
+}
+
+type UserBadges struct {
+	ID      uint `gorm:"primaryKey"`
+	UserID  uint `gorm:"foreignKey:UserID"`
+	BadgeID uint `gorm:"foreignKey:BadgeID"`
+}
+
+type Skills struct {
+	ID     uint `gorm:"primaryKey"`
+	UserID uint `gorm:"foreignKey:UserID"`
+	Skill  string
+	Level  int `gorm:"validate:min=0,max=10"`
+}
+
+type Followers struct {
+	ID         uint      `gorm:"primaryKey"`
+	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
+	UserID     uint      `gorm:"foreignKey:UserID"`
+	FollowerID uint      `gorm:"foreignKey:UserID"`
+}
