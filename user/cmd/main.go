@@ -14,5 +14,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	server.Start()
+	if err := server.Start(cfg.APP_PORT); err != nil {
+		fmt.Println(err.Error())
+	}
 }

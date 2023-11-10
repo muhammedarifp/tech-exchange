@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,19 +18,19 @@ func NewServerHTTP(userHandler *handlers.UserHandler) *ServerHTTP {
 
 	engine.Use(middleware.LoggingMiddleware)
 
-	engine.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
+	// User Routes
+	userRouter := engine.PathPrefix("/user").Subrouter()
 
-	engine.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello User"))
-	})
+	userRouter.HandleFunc("/signup", userHandler.UserSignupHandler).Methods("POST")
+	userRouter.HandleFunc("/login", userHandler.UserLoginHandler).Methods("POST")
+	userRouter.HandleFunc("/isuserexist")
 
 	return &ServerHTTP{engine: engine}
 }
 
-func (r *ServerHTTP) Start() error {
-	if err := http.ListenAndServe(":8080", r.engine); err != nil {
+func (r *ServerHTTP) Start(port string) error {
+	fmt.Println("Server Starting ...!")
+	if err := http.ListenAndServe(port, r.engine); err != nil {
 		return err
 	} else {
 		return nil

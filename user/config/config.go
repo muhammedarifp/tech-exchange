@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	APP_PORT    string
 	DB_USER     string
 	DB_NAME     string
 	DB_PASSWORD string

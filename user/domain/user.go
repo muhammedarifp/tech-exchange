@@ -6,14 +6,15 @@ import (
 
 // Db Structures
 type Users struct {
-	ID         uint      `gorm:"primaryKey"`
-	CreateAt   time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
-	Username   string    `gorm:"index; NOT NULL; unique"`
-	Email      string    `gorm:"NOT NULL"`
-	Password   string    `gorm:"NOT NULL"`
-	Is_admin   bool      `gorm:"NOT NULL; default:false"`
-	Is_Premium bool      `gorm:"NOT NULL; default:false"`
-	Is_active  bool      `gorm:"NOT NULL; default:true"`
+	ID          uint      `gorm:"primaryKey"`
+	CreateAt    time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
+	Username    string    `gorm:"index; NOT NULL; unique"`
+	Email       string    `gorm:"index; NOT NULL; unique"`
+	Password    string    `gorm:"NOT NULL"`
+	Is_admin    bool      `gorm:"NOT NULL; default:false"`
+	Is_Premium  bool      `gorm:"NOT NULL; default:false"`
+	Is_active   bool      `gorm:"NOT NULL; default:true"`
+	Is_verified bool      `gorm:"NOT NULL; default:false"`
 }
 
 type Profiles struct {

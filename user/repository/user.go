@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
@@ -18,11 +20,25 @@ func NewUserRepository(db *gorm.DB) interfaces.UserRepository {
 func (d *userDatabase) UserSignup(user requests.UserSignupReq) (response.UserValue, error) {
 	insertQury := `INSERT INTO users(username,email,password) VALUES ($1,$2,$3)
 				RETURNING id,username,email,password,is_active`
-	userVal := new(response.UserValue)
+	userVal := response.UserValue{}
 	err := d.DB.Raw(insertQury, user.Name, user.Email, user.Password).Scan(&userVal).Error
 	if err != nil {
 		return response.UserValue{}, err
 	} else {
-		return *userVal, err
+		fmt.Println(userVal)
+		return userVal, nil
 	}
+}
+
+func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
+	qury := `SELECT id,username,email,password FROM users WHERE email = $1 LIMIT = 1`
+	userVal := response.UserValue{}
+
+	if err := d.DB.Raw(qury, user.Email).Scan(&userVal).Error; err != nil {
+		fmt.Println("login repo err")
+		fmt.Println(err.Error())
+		return response.UserValue{}, err
+	}
+
+	return userVal, nil
 }

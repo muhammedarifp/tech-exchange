@@ -1,14 +1,14 @@
 package usecases
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
 	services "github.com/muhammedarifp/user/usecases/interfaces"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userUseCase struct {
@@ -22,14 +22,9 @@ func NewUserUseCase(repo interfaces.UserRepository) services.UserUseCase {
 }
 
 func (u *userUseCase) UserSignup(user requests.UserSignupReq) (response.UserValue, error) {
-	// User Password Hashing
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
-	if err != nil {
-		logrus.Info("password hashing error")
-	}
 
 	// Replace user pass into hash
-	user.Password = string(hash)
+	user.Password = helperfuncs.PaaswordToHash(user.Password)
 
 	// Create username
 	newUsername := strings.Split(user.Name, " ")[0] + "1"
@@ -38,9 +33,23 @@ func (u *userUseCase) UserSignup(user requests.UserSignupReq) (response.UserValu
 	// Call User Repository
 	res, ferr := u.userRepo.UserSignup(user)
 
+	fmt.Println("-->", ferr)
+
 	if ferr != nil {
-		return response.UserValue{}, err
+		return response.UserValue{}, ferr
 	} else {
-		return res, ferr
+		return res, nil
 	}
+}
+
+func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
+	userVal, err := u.userRepo.UserLogin(user)
+	if err != nil {
+		fmt.Println(err.Error())
+		return response.UserValue{}, err
+	}
+
+	fmt.Printf("Type : %T\n", userVal)
+	fmt.Printf("%+v", userVal)
+	return userVal, nil
 }

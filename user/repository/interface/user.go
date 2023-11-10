@@ -7,5 +7,5 @@ import (
 
 type UserRepository interface {
 	UserSignup(user requests.UserSignupReq) (response.UserValue, error)
-	// UserLogin(requests.UserSignupReq) (response.UserLoginResp, error)
+	UserLogin(user requests.UserLoginReq) (response.UserValue, error)
 }

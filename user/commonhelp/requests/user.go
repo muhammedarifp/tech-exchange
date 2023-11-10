@@ -1,12 +1,12 @@
 package requests
 
 type UserLoginReq struct {
-	Email    string `validate:"required,email,omitempty"`
-	Password string `validate:"required,min=6"`
+	Email    string `json:"email" validate:"required,email,omitempty"`
+	Password string `json:"password" validate:"required,min=6"`
 }
 
 type UserSignupReq struct {
-	Name     string `validate:"required,omitempty"`
-	Email    string `validate:"email,reqired"`
-	Password string `validate:"required,min=6"`
+	Name     string `json:"name,omitempty" validate:"required,omitempty"`
+	Email    string `json:"email,omitempty" validate:"email,required"`
+	Password string `json:"password,omitempty" validate:"min=6"`
 }
