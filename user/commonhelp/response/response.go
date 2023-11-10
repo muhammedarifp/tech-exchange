@@ -1,7 +1,7 @@
 package response
 
 type Response struct {
-	StatusCode int         `json:"stastuscode"`
+	StatusCode int         `json:"statuscode"`
 	Message    string      `json:"message"`
 	Data       interface{} `json:"data"`
 	Errors     interface{} `json:"error"`
@@ -12,5 +12,5 @@ type LoginResponse struct {
 	Message    string      `json:"message"`
 	Data       interface{} `json:"data"`
 	Errors     interface{} `json:"error"`
-	Token      string      `json:"token"`
+	Token      interface{} `json:"token"`
 }

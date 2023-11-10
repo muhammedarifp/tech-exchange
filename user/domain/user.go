@@ -7,8 +7,8 @@ import (
 // Db Structures
 type Users struct {
 	ID          uint      `gorm:"primaryKey"`
-	CreateAt    time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
-	Username    string    `gorm:"index; NOT NULL; unique"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP; NOT NULL"`
+	Username    string    `gorm:"NOT NULL; unique"`
 	Email       string    `gorm:"index; NOT NULL; unique"`
 	Password    string    `gorm:"NOT NULL"`
 	Is_admin    bool      `gorm:"NOT NULL; default:false"`

@@ -31,11 +31,10 @@ func (d *userDatabase) UserSignup(user requests.UserSignupReq) (response.UserVal
 }
 
 func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
-	qury := `SELECT id,username,email,password FROM users WHERE email = $1 LIMIT = 1`
+	qury := `SELECT id,username,email,created_at,password FROM users WHERE email = $1`
 	userVal := response.UserValue{}
 
 	if err := d.DB.Raw(qury, user.Email).Scan(&userVal).Error; err != nil {
-		fmt.Println("login repo err")
 		fmt.Println(err.Error())
 		return response.UserValue{}, err
 	}

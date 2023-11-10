@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	services "github.com/muhammedarifp/user/usecases/interfaces"
@@ -103,18 +104,25 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 
 // User Login function
 func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
-	userVal := requests.UserLoginReq{}
+	userEnterVal := requests.UserLoginReq{}
 	body, bodyErr := io.ReadAll(r.Body)
 	if bodyErr != nil {
 		fmt.Println("1. ", bodyErr.Error())
 	}
+
+	// Setup header
+	// Our response is json
 	w.Header().Set("Content-Type", "application/json")
 
-	if err := json.Unmarshal(body, &userVal); err != nil {
+	// Unmarshel user entered data
+	// Using json package
+	if err := json.Unmarshal(body, &userEnterVal); err != nil {
 		fmt.Println("2. ", err.Error())
 	}
 
-	if err := validator.New().Struct(userVal); err != nil {
+	// Struct validation using validator package
+	// For using simplycity
+	if err := validator.New().Struct(userEnterVal); err != nil {
 		jsonVal, jsonErr := json.Marshal(response.Response{
 			StatusCode: 422,
 			Message:    "Can't Bind",
@@ -130,5 +138,49 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.userUserCase.UserLogin(userVal)
+	userVal, err := h.userUserCase.UserLogin(userEnterVal)
+	if err != nil {
+		jsonVal, jsonErr := json.Marshal(response.Response{
+			StatusCode: 422,
+			Message:    "Can't Bind",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
+
+		if jsonErr != nil {
+			panic(jsonErr.Error())
+		}
+
+		w.Write(jsonVal)
+		return
+	}
+
+	if userEnterVal.Email == userVal.Email && helperfuncs.CompareHashPassAndEnteredPass(userVal.Password, userEnterVal.Password) {
+		token := helperfuncs.CreateJwtToken(userVal.ID)
+		jsonVal, jsonErr := json.Marshal(response.LoginResponse{
+			StatusCode: 200,
+			Message:    "Login success",
+			Data:       userVal,
+			Errors:     nil,
+			Token:      token,
+		})
+		if jsonErr != nil {
+			panic("myraaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+		}
+		w.Write(jsonVal)
+	} else {
+		jsonVal, jsonErr := json.Marshal(response.LoginResponse{
+			StatusCode: 401,
+			Message:    "Login failure",
+			Data:       nil,
+			Errors:     "email or password is incorrect",
+			Token:      nil,
+		})
+		if jsonErr != nil {
+			panic("myraaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+		}
+		w.Write(jsonVal)
+	}
+
+	helperfuncs.CreateJwtToken(userVal.ID)
 }

@@ -49,7 +49,6 @@ func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue,
 		return response.UserValue{}, err
 	}
 
-	fmt.Printf("Type : %T\n", userVal)
-	fmt.Printf("%+v", userVal)
+	fmt.Println(userVal)
 	return userVal, nil
 }

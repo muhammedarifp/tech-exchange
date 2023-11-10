@@ -1,23 +1,13 @@
 package response
 
-import "time"
+import (
+	"time"
+)
 
 type UserValue struct {
-	ID        uint      `json:"id" gorm:"unique;not null"`
-	UserName  string    `json:"name"`
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
-	CreatedAt time.Time `json:"created_time"`
-}
-
-type UserLoginResp struct {
-	Status  bool   `json:"status"`
-	Message string `json:"message"`
-	UserValue
-}
-
-type UserSignupResp struct {
-	Status  bool
-	Message string
-	UserValue
 }

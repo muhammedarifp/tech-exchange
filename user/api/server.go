@@ -23,7 +23,7 @@ func NewServerHTTP(userHandler *handlers.UserHandler) *ServerHTTP {
 
 	userRouter.HandleFunc("/signup", userHandler.UserSignupHandler).Methods("POST")
 	userRouter.HandleFunc("/login", userHandler.UserLoginHandler).Methods("POST")
-	userRouter.HandleFunc("/isuserexist")
+	// userRouter.HandleFunc("/isuserexist")
 
 	return &ServerHTTP{engine: engine}
 }
