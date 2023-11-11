@@ -23,6 +23,13 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	}
 }
 
+// @Summary Get user by ID
+// @Description Get a user by its ID
+// @ID get-user-by-id
+// @Param id path int true "User ID"
+// @Success 200 {object} User
+// @Failure 404 {string} string "User not found"
+// @Router /users/{id} [get]
 func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -183,4 +190,10 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helperfuncs.CreateJwtToken(userVal.ID)
+}
+
+// Email verification handler
+
+func (u *UserHandler) VerifyEmailHandler(w http.ResponseWriter, r *http.Request) {
+
 }

@@ -21,3 +21,16 @@ func CreateJwtToken(userid uint) string {
 
 	return tokenStr
 }
+
+func GetUserIdFromJwt(token string) (uint, error) {
+	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+
+	if err != nil {
+		return 0, err
+	} else {
+		fmt.Println(parsedToken.Claims)
+		return 0, nil
+	}
+}

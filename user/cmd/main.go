@@ -12,9 +12,9 @@ func main() {
 	server, err := di.InitializeAPI(cfg)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("1. ", err.Error())
 	}
 	if err := server.Start(cfg.APP_PORT); err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("2. ", err.Error())
 	}
 }
