@@ -41,3 +41,13 @@ func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue
 
 	return userVal, nil
 }
+
+func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, error) {
+	qury := `SELECT id,username,created_at,email FROM users WHERE id = $1`
+	userData := response.UserValue{}
+	err := d.DB.Raw(qury, userid).Scan(&userData).Error
+	if err != nil {
+		return userData, err
+	}
+	return userData, nil
+}

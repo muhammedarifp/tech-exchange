@@ -52,3 +52,20 @@ func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue,
 	fmt.Println(userVal)
 	return userVal, nil
 }
+
+func (u *userUseCase) UserEmailVerify(token string) (bool, error) {
+	userid, err := helperfuncs.GetUserIdFromJwt(token)
+	if err != nil {
+		fmt.Println("Token not valid")
+		return false, err
+	}
+
+	userVal, repoErr := u.userRepo.GetUserDetaUsingID(userid)
+	if repoErr != nil {
+		return false, err
+	}
+
+	fmt.Println(userVal)
+
+	return true, nil
+}

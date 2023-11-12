@@ -195,5 +195,27 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 // Email verification handler
 
 func (u *UserHandler) VerifyEmailHandler(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Token")
 
+	// Case 1
+	// token is inavlid case
+	if token == "" {
+		jsonVal, _ := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "token is invalid",
+			Data:       nil,
+			Errors:     "noken is invalid",
+		})
+
+		w.Write(jsonVal)
+		return
+	}
+
+	// Case 2
+	//
+	if status, _ := u.userUserCase.UserEmailVerify(token); !status {
+		w.Write([]byte("Somthing wrong"))
+	} else {
+		w.Write([]byte("Okkk !!"))
+	}
 }

@@ -12,16 +12,23 @@ type Config struct {
 	DB_NAME     string
 	DB_PASSWORD string
 	DB_PORT     string
+	JWT_SECRET  string
 }
 
+var cfg Config
+
 func LoadConfig() Config {
+	viper.AddConfigPath("")
 	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal("erroooor !!!!!!")
+		log.Fatal(err.Error())
 	}
 
-	var cfg Config
 	viper.Unmarshal(&cfg)
 
 	return cfg
+}
+
+func GetConfig() *Config {
+	return &cfg
 }

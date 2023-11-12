@@ -8,4 +8,5 @@ import (
 type UserUseCase interface {
 	UserSignup(user requests.UserSignupReq) (response.UserValue, error)
 	UserLogin(user requests.UserLoginReq) (response.UserValue, error)
+	UserEmailVerify(token string) (bool, error)
 }
