@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -194,28 +195,53 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // Email verification handler
 
-func (u *UserHandler) VerifyEmailHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) SendUserOtpHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the token from the request header.
 	token := r.Header.Get("Token")
 
-	// Case 1
-	// token is inavlid case
+	// Check if the token is empty.
 	if token == "" {
-		jsonVal, _ := json.Marshal(response.Response{
-			StatusCode: 400,
-			Message:    "token is invalid",
-			Data:       nil,
-			Errors:     "noken is invalid",
-		})
-
-		w.Write(jsonVal)
+		// Return a 400 Bad Request error with the message "token is invalid".
+		http.Error(w, "token is invalid", http.StatusBadRequest)
 		return
 	}
 
-	// Case 2
-	//
-	if status, _ := u.userUserCase.UserEmailVerify(token); !status {
-		w.Write([]byte("Somthing wrong"))
+	// Call the `UserEmailVerificationSend()` method on the `UserUseCase` to verify the email address.
+	status, err := u.userUserCase.UserEmailVerificationSend(token)
+	if err != nil {
+		// Return a 500 Internal Server Error error with the message "Something went wrong".
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if the email address was successfully verified.
+	if !status {
+		// Return a 400 Bad Request error with the message "Email address verification failed".
+		http.Error(w, "Email address verification failed", http.StatusBadRequest)
+		return
+	}
+
+	// Write a success response to the client.
+	w.Write([]byte("Okkk !!"))
+}
+
+func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Token")
+	body, body_err := io.ReadAll(r.Body)
+	if body_err != nil {
+		log.Fatal(body_err.Error())
+	}
+
+	userEnterVal := requests.UserEmailVerificationReq{}
+	if err := json.Unmarshal(body, &userEnterVal); err != nil {
+		w.Write([]byte("Can't bind"))
+		return
+	}
+
+	_, err := u.userUserCase.UserEmailVerify(userEnterVal, token)
+	if err != nil {
+		w.Write([]byte(err.Error()))
 	} else {
-		w.Write([]byte("Okkk !!"))
+		w.Write([]byte("Okkkkkkkkkkkkkkkkkkkkkkkkkkk !"))
 	}
 }

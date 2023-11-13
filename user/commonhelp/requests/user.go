@@ -10,3 +10,7 @@ type UserSignupReq struct {
 	Email    string `json:"email,omitempty" validate:"email,required"`
 	Password string `json:"password,omitempty" validate:"min=6"`
 }
+
+type UserEmailVerificationReq struct {
+	Otp string `json:"otp,omitempty" validate:"required,min=5"`
+}

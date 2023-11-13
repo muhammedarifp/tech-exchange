@@ -1,10 +1,14 @@
 package repository
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
+	"github.com/muhammedarifp/user/db"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
 	"gorm.io/gorm"
 )
@@ -50,4 +54,38 @@ func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, er
 		return userData, err
 	}
 	return userData, nil
+}
+
+func (d *userDatabase) StoreOtpAndUniqueID(userid, otp string) error {
+	rdb := db.CreateRedisConnection(1)
+	status := rdb.Set(context.Background(), userid, otp, time.Minute*2)
+	if status.Err() != nil {
+		return status.Err()
+	} else {
+		return nil
+	}
+}
+
+func (d *userDatabase) VerifyUserAccount(userid, otp string) (response.UserValue, error) {
+	rdb := db.CreateRedisConnection(1)
+	redis_res := rdb.Get(context.Background(), userid)
+	db_stored_otp, redis_err := redis_res.Result()
+	if redis_err != nil {
+		return response.UserValue{}, redis_err
+	}
+
+	fmt.Println(db_stored_otp + " - " + otp)
+
+	if db_stored_otp == otp {
+		qury := `UPDATE users SET is_verified = true WHERE id = $1 
+				RETURNING id,username,email,created_at,password,is_verified`
+		userVal := response.UserValue{}
+		if err := d.DB.Raw(qury, userid).Scan(&userVal).Error; err != nil {
+			return response.UserValue{}, err
+		}
+
+		return userVal, nil
+	} else {
+		return response.UserValue{}, errors.New("invalid otp provided")
+	}
 }

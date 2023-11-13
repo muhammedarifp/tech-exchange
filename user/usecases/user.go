@@ -53,7 +53,7 @@ func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue,
 	return userVal, nil
 }
 
-func (u *userUseCase) UserEmailVerify(token string) (bool, error) {
+func (u *userUseCase) UserEmailVerificationSend(token string) (bool, error) {
 	userid, err := helperfuncs.GetUserIdFromJwt(token)
 	if err != nil {
 		fmt.Println("Token not valid")
@@ -65,7 +65,26 @@ func (u *userUseCase) UserEmailVerify(token string) (bool, error) {
 		return false, err
 	}
 
-	fmt.Println(userVal)
+	otp := helperfuncs.RandomOtpGenarator()
+
+	helperfuncs.SendVerificationMail(userVal.Email, otp, userid)
+	if err := u.userRepo.StoreOtpAndUniqueID(userid, otp); err != nil {
+		return false, err
+	}
 
 	return true, nil
+}
+
+func (u *userUseCase) UserEmailVerify(otp requests.UserEmailVerificationReq, token string) (response.UserValue, error) {
+	userid, err := helperfuncs.GetUserIdFromJwt(token)
+	if err != nil {
+		return response.UserValue{}, fmt.Errorf("invalid auth token")
+	}
+
+	userVal, repo_err := u.userRepo.VerifyUserAccount(userid, otp.Otp)
+	if repo_err != nil {
+		return userVal, repo_err
+	}
+
+	return userVal, nil
 }

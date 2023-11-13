@@ -7,12 +7,14 @@ import (
 )
 
 type Config struct {
-	APP_PORT    string
-	DB_USER     string
-	DB_NAME     string
-	DB_PASSWORD string
-	DB_PORT     string
-	JWT_SECRET  string
+	APP_PORT       string
+	DB_USER        string
+	DB_NAME        string
+	DB_PASSWORD    string
+	DB_PORT        string
+	JWT_SECRET     string
+	EMAIL          string
+	EMAIL_PASSWORD string
 }
 
 var cfg Config
