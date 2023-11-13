@@ -44,7 +44,7 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 	userAuthRouter.Use(middleware.AuthUserMiddleware)
 
 	// Add the user authentication handlers.
-	userAuthRouter.HandleFunc("/otp/send", userHandler.SendUserOtpHandler).Methods("POST")
+	userAuthRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
 	userAuthRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
 
 	return &ServerHTTP{engine: engine}

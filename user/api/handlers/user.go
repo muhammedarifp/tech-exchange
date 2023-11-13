@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -195,53 +194,87 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // Email verification handler
 
-func (u *UserHandler) SendUserOtpHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the token from the request header.
 	token := r.Header.Get("Token")
-
+	w.Header().Set("Content-Type", "application/json")
 	// Check if the token is empty.
 	if token == "" {
 		// Return a 400 Bad Request error with the message "token is invalid".
-		http.Error(w, "token is invalid", http.StatusBadRequest)
+		json_resp, _ := json.Marshal(response.ReqOtpResp{
+			StatusCode: 400,
+			Status:     false,
+			Message:    "The token you provided is invalid or has expired. Please generate a new token and try again",
+			Error:      "token is invalid",
+		})
+		w.Write(json_resp)
 		return
 	}
 
 	// Call the `UserEmailVerificationSend()` method on the `UserUseCase` to verify the email address.
-	status, err := u.userUserCase.UserEmailVerificationSend(token)
+	_, err := u.userUserCase.UserEmailVerificationSend(token)
 	if err != nil {
 		// Return a 500 Internal Server Error error with the message "Something went wrong".
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	// Check if the email address was successfully verified.
-	if !status {
-		// Return a 400 Bad Request error with the message "Email address verification failed".
-		http.Error(w, "Email address verification failed", http.StatusBadRequest)
+		json_resp, _ := json.Marshal(response.ReqOtpResp{
+			StatusCode: 500,
+			Status:     false,
+			Message:    "Something went wrong while processing your request. Please try again later",
+			Error:      err.Error(),
+		})
+		w.Write(json_resp)
 		return
 	}
 
 	// Write a success response to the client.
-	w.Write([]byte("Okkk !!"))
+	json_resp, _ := json.Marshal(response.ReqOtpResp{
+		StatusCode: 200,
+		Status:     true,
+		Message:    "OTP sent to your email successfully! Your OTP is valid for 10 minutes. If you do not receive your OTP within 2 minutes, please try again",
+		Error:      nil,
+	})
+	w.Write(json_resp)
 }
 
 func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the token from the request header.
 	token := r.Header.Get("Token")
-	body, body_err := io.ReadAll(r.Body)
-	if body_err != nil {
-		log.Fatal(body_err.Error())
-	}
+	w.Header().Set("Content-Type", "application/json")
 
-	userEnterVal := requests.UserEmailVerificationReq{}
-	if err := json.Unmarshal(body, &userEnterVal); err != nil {
-		w.Write([]byte("Can't bind"))
+	// Decode the request body.
+	var userEnterVal requests.UserEmailVerificationReq
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&userEnterVal); err != nil {
+		json_resp, _ := json.Marshal(response.VerifyOtpResp{
+			StatusCode: 400,
+			Status:     false,
+			Message:    "The request body could not be parsed into a valid UserEmailVerificationReq object",
+			Error:      "CAN_NOT_BIND",
+			Data:       nil,
+		})
+		w.Write(json_resp)
 		return
 	}
 
-	_, err := u.userUserCase.UserEmailVerify(userEnterVal, token)
+	// Validate the OTP.
+	userVal, err := u.userUserCase.UserEmailVerify(userEnterVal, token)
 	if err != nil {
-		w.Write([]byte(err.Error()))
-	} else {
-		w.Write([]byte("Okkkkkkkkkkkkkkkkkkkkkkkkkkk !"))
+		json_resp, _ := json.Marshal(response.VerifyOtpResp{
+			StatusCode: 400,
+			Status:     false,
+			Message:    err.Error(),
+			Error:      "SOMETHING_WENT_WRONG",
+			Data:       nil,
+		})
+		w.Write(json_resp)
+		return
 	}
+
+	json_resp, _ := json.Marshal(response.VerifyOtpResp{
+		StatusCode: 200,
+		Status:     true,
+		Message:    "OTP verification successful!",
+		Error:      nil,
+		Data:       userVal,
+	})
+	w.Write(json_resp)
 }

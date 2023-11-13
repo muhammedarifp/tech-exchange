@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	"github.com/muhammedarifp/user/db"
@@ -47,7 +48,7 @@ func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue
 }
 
 func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, error) {
-	qury := `SELECT id,username,created_at,email FROM users WHERE id = $1`
+	qury := `SELECT id,username,created_at,email,is_verified FROM users WHERE id = $1`
 	userData := response.UserValue{}
 	err := d.DB.Raw(qury, userid).Scan(&userData).Error
 	if err != nil {
@@ -71,10 +72,11 @@ func (d *userDatabase) VerifyUserAccount(userid, otp string) (response.UserValue
 	redis_res := rdb.Get(context.Background(), userid)
 	db_stored_otp, redis_err := redis_res.Result()
 	if redis_err != nil {
+		if errors.Is(redis_err, redis.Nil) {
+			return response.UserValue{}, errors.New("the OTP has expired. Please generate a new OTP and try again")
+		}
 		return response.UserValue{}, redis_err
 	}
-
-	fmt.Println(db_stored_otp + " - " + otp)
 
 	if db_stored_otp == otp {
 		qury := `UPDATE users SET is_verified = true WHERE id = $1 
@@ -83,7 +85,6 @@ func (d *userDatabase) VerifyUserAccount(userid, otp string) (response.UserValue
 		if err := d.DB.Raw(qury, userid).Scan(&userVal).Error; err != nil {
 			return response.UserValue{}, err
 		}
-
 		return userVal, nil
 	} else {
 		return response.UserValue{}, errors.New("invalid otp provided")

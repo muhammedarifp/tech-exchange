@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -65,6 +66,10 @@ func (u *userUseCase) UserEmailVerificationSend(token string) (bool, error) {
 		return false, err
 	}
 
+	if userVal.Is_verified {
+		return false, errors.New("the user with the email address '" + userVal.Email + "' has already verified their email address")
+	}
+
 	otp := helperfuncs.RandomOtpGenarator()
 
 	helperfuncs.SendVerificationMail(userVal.Email, otp, userid)
@@ -77,6 +82,15 @@ func (u *userUseCase) UserEmailVerificationSend(token string) (bool, error) {
 
 func (u *userUseCase) UserEmailVerify(otp requests.UserEmailVerificationReq, token string) (response.UserValue, error) {
 	userid, err := helperfuncs.GetUserIdFromJwt(token)
+
+	userVal, _ := u.userRepo.GetUserDetaUsingID(userid)
+
+	fmt.Println(userVal.Is_verified)
+
+	if userVal.Is_verified {
+		return response.UserValue{}, errors.New("the user with the email address '" + userVal.Email + "' has already verified their email address")
+	}
+
 	if err != nil {
 		return response.UserValue{}, fmt.Errorf("invalid auth token")
 	}
