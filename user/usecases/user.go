@@ -46,12 +46,14 @@ func (u *userUseCase) UserSignup(user requests.UserSignupReq) (response.UserValu
 func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
 	userVal, err := u.userRepo.UserLogin(user)
 	if err != nil {
-		fmt.Println(err.Error())
 		return response.UserValue{}, err
 	}
 
-	fmt.Println(userVal)
-	return userVal, nil
+	if userVal.Email == user.Email && helperfuncs.CompareHashPassAndEnteredPass(userVal.Password, user.Password) {
+		return userVal, nil
+	} else {
+		return response.UserValue{}, errors.New("username or password is invalid")
+	}
 }
 
 func (u *userUseCase) UserEmailVerificationSend(token string) (bool, error) {

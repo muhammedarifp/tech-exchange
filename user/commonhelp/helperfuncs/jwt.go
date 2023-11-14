@@ -8,11 +8,11 @@ import (
 	"github.com/muhammedarifp/user/config"
 )
 
-func CreateJwtToken(userid uint) string {
+func CreateJwtToken(userid uint, is_admin bool) string {
 	cfg := config.GetConfig()
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userid":   strconv.Itoa(int(userid)),
-		"is_admin": false,
+		"is_admin": is_admin,
 	})
 
 	tokenStr, err := claims.SignedString([]byte(cfg.JWT_SECRET))

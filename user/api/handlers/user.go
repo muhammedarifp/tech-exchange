@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -109,90 +110,77 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// User Login function
 func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
-	userEnterVal := requests.UserLoginReq{}
+	// Read the request body.
 	body, bodyErr := io.ReadAll(r.Body)
 	if bodyErr != nil {
-		fmt.Println("1. ", bodyErr.Error())
+		log.Println("Error reading request body:", bodyErr)
+		http.Error(w, "Can't read request body", http.StatusBadRequest)
+		return
 	}
 
-	// Setup header
-	// Our response is json
+	// Set the response header to JSON.
 	w.Header().Set("Content-Type", "application/json")
 
-	// Unmarshel user entered data
-	// Using json package
+	// Unmarshal the request body into the user struct.
+	var userEnterVal requests.UserLoginReq
 	if err := json.Unmarshal(body, &userEnterVal); err != nil {
-		fmt.Println("2. ", err.Error())
+		log.Println("Error unmarshalling request body:", err)
+		http.Error(w, "Can't bind request body", http.StatusUnprocessableEntity)
+		return
 	}
 
-	// Struct validation using validator package
-	// For using simplycity
+	// Validate the user struct.
 	if err := validator.New().Struct(userEnterVal); err != nil {
+		log.Println("Error validating user struct:", err)
 		jsonVal, jsonErr := json.Marshal(response.Response{
 			StatusCode: 422,
-			Message:    "Can't Bind",
+			Message:    "Can't bind request body",
 			Data:       nil,
 			Errors:     err.Error(),
 		})
-
 		if jsonErr != nil {
-			panic(jsonErr.Error())
+			log.Fatalln("Error marshalling JSON response:", jsonErr)
 		}
-
 		w.Write(jsonVal)
 		return
 	}
 
+	// Get the user from the database.
 	userVal, err := h.userUserCase.UserLogin(userEnterVal)
 	if err != nil {
+		log.Println("Error getting user from database:", err)
 		jsonVal, jsonErr := json.Marshal(response.Response{
 			StatusCode: 422,
-			Message:    "Can't Bind",
+			Message:    "Something went wrong",
 			Data:       nil,
 			Errors:     err.Error(),
 		})
-
 		if jsonErr != nil {
-			panic(jsonErr.Error())
+			log.Fatalln("Error marshalling JSON response:", jsonErr)
 		}
-
 		w.Write(jsonVal)
 		return
 	}
 
-	if userEnterVal.Email == userVal.Email && helperfuncs.CompareHashPassAndEnteredPass(userVal.Password, userEnterVal.Password) {
-		token := helperfuncs.CreateJwtToken(userVal.ID)
-		jsonVal, jsonErr := json.Marshal(response.LoginResponse{
-			StatusCode: 200,
-			Message:    "Login success",
-			Data:       userVal,
-			Errors:     nil,
-			Token:      token,
-		})
-		if jsonErr != nil {
-			panic("myraaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-		}
-		w.Write(jsonVal)
-	} else {
-		jsonVal, jsonErr := json.Marshal(response.LoginResponse{
-			StatusCode: 401,
-			Message:    "Login failure",
-			Data:       nil,
-			Errors:     "email or password is incorrect",
-			Token:      nil,
-		})
-		if jsonErr != nil {
-			panic("myraaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-		}
-		w.Write(jsonVal)
+	// Generate the JWT token.
+	token := helperfuncs.CreateJwtToken(userVal.ID, false)
+
+	// Marshal the response into JSON.
+	jsonVal, jsonErr := json.Marshal(response.LoginResponse{
+		StatusCode: 200,
+		Message:    "Login success",
+		Data:       userVal,
+		Errors:     nil,
+		Token:      token,
+	})
+	if jsonErr != nil {
+		log.Println("Error marshalling JSON response:", jsonErr)
 	}
 
-	helperfuncs.CreateJwtToken(userVal.ID)
+	// Write the response to the client.
+	w.Write(jsonVal)
 }
-
-// Email verification handler
 
 func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the token from the request header.

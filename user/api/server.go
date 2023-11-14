@@ -7,13 +7,24 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/muhammedarifp/user/api/handlers"
 	"github.com/muhammedarifp/user/api/middleware"
-	httpSwagger "github.com/swaggo/http-swagger/v2"
+	_ "github.com/muhammedarifp/user/cmd/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type ServerHTTP struct {
 	engine *mux.Router
 }
 
+// @Summary Create a new user
+// @Description Create a new user with the specified details
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param name formData string true "User's name"
+// @Param email formData string true "User's email"
+// @Success 201 {object} UserResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/users/create [post]
 func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.AdminHandler) *ServerHTTP {
 	// Create a new mux router.
 	engine := mux.NewRouter()
@@ -22,7 +33,7 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 	engine.Use(middleware.LoggingMiddleware)
 
 	// Serve the Swagger UI documentation.
-	engine.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", http.FileServer(http.Dir("/home/arifu/Desktop/Tech Exchange/user/cmd/docs/swagger.json")))).Handler(httpSwagger.WrapHandler)
+	engine.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	// Create a subrouter for the user routes.
 	userRouter := engine.PathPrefix("/api/users").Subrouter()

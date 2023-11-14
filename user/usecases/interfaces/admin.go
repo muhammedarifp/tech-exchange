@@ -6,5 +6,5 @@ import (
 )
 
 type AdminUsecase interface {
-	AdminLogin(admin requests.AdminRequest) (response.AdminValue, error)
+	AdminLogin(admin requests.AdminRequest) (response.AdminValue, string, error)
 }

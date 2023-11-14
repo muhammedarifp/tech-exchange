@@ -1,7 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a content sharing platform like medium or dev.to",
+        "title": "Tech Exchange",
+        "contact": {},
+        "version": "1.0"
     },
+    "host": "localhost:8000",
+    "basePath": "/api/v1",
     "paths": {}
 }
