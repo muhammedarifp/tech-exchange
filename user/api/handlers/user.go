@@ -110,13 +110,16 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+//
+// ----------------------------------------------
+//
+
 func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Read the request body.
 	body, bodyErr := io.ReadAll(r.Body)
 	if bodyErr != nil {
 		log.Println("Error reading request body:", bodyErr)
 		http.Error(w, "Can't read request body", http.StatusBadRequest)
-		return
 	}
 
 	// Set the response header to JSON.
@@ -126,13 +129,23 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	var userEnterVal requests.UserLoginReq
 	if err := json.Unmarshal(body, &userEnterVal); err != nil {
 		log.Println("Error unmarshalling request body:", err)
-		http.Error(w, "Can't bind request body", http.StatusUnprocessableEntity)
+		json_val, json_err := json.Marshal(response.Response{
+			StatusCode: 400,
+			Errors:     "Can't bind request body",
+			Data:       nil,
+			Message:    "Can't bind",
+		})
+
+		if json_err != nil {
+			log.Fatal(json_err.Error())
+		}
+
+		w.Write(json_val)
 		return
 	}
 
 	// Validate the user struct.
 	if err := validator.New().Struct(userEnterVal); err != nil {
-		log.Println("Error validating user struct:", err)
 		jsonVal, jsonErr := json.Marshal(response.Response{
 			StatusCode: 422,
 			Message:    "Can't bind request body",
@@ -147,9 +160,9 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the user from the database.
-	userVal, err := h.userUserCase.UserLogin(userEnterVal)
+	userVal, status_code, err := h.userUserCase.UserLogin(userEnterVal)
 	if err != nil {
-		log.Println("Error getting user from database:", err)
+		w.WriteHeader(status_code)
 		jsonVal, jsonErr := json.Marshal(response.Response{
 			StatusCode: 422,
 			Message:    "Something went wrong",

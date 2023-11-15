@@ -43,16 +43,20 @@ func (u *userUseCase) UserSignup(user requests.UserSignupReq) (response.UserValu
 	}
 }
 
-func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
+func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue, int, error) {
 	userVal, err := u.userRepo.UserLogin(user)
 	if err != nil {
-		return response.UserValue{}, err
+		return response.UserValue{}, 400, err
+	}
+
+	if !userVal.Is_verified {
+		return response.UserValue{}, 403, errors.New("your email address has not been verified. please verify your email address before logging in")
 	}
 
 	if userVal.Email == user.Email && helperfuncs.CompareHashPassAndEnteredPass(userVal.Password, user.Password) {
-		return userVal, nil
+		return userVal, 200, nil
 	} else {
-		return response.UserValue{}, errors.New("username or password is invalid")
+		return response.UserValue{}, 401, errors.New("username or password is invalid")
 	}
 }
 
