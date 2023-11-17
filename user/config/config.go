@@ -15,6 +15,9 @@ type Config struct {
 	JWT_SECRET     string
 	EMAIL          string
 	EMAIL_PASSWORD string
+	REDIS_OTP      int
+	REDIS_EMAIL    int
+	REDIS_USER     int
 }
 
 var cfg Config

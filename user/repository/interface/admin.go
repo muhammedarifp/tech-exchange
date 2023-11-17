@@ -7,4 +7,5 @@ import (
 
 type AdminRepository interface {
 	AdminLogin(admin requests.AdminRequest) (response.AdminValue, error)
+	BanUser(userid string) (response.UserValue, error)
 }

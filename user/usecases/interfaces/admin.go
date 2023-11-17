@@ -7,4 +7,5 @@ import (
 
 type AdminUsecase interface {
 	AdminLogin(admin requests.AdminRequest) (response.AdminValue, string, error)
+	BanUser(userid string) (response.UserValue, error)
 }

@@ -50,13 +50,14 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 
 	// Add the admin handler.
 	adminRouter.HandleFunc("/login", adminHandler.AdminLoginHandler).Methods("POST")
+	adminRouter.HandleFunc("/users/ban/{userid}", adminHandler.AdminBanUserHandler)
 
 	// Add a middleware to the user authentication routes to check if the user is authenticated.
 	userAuthRouter.Use(middleware.AuthUserMiddleware)
 
 	// Add the user authentication handlers.
-	userAuthRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
-	userAuthRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
+	userRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
+	userRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
 
 	return &ServerHTTP{engine: engine}
 }

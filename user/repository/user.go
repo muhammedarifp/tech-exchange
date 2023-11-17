@@ -2,13 +2,15 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/muhammedarifp/user/commonhelp/cache"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
+	"github.com/muhammedarifp/user/config"
 	"github.com/muhammedarifp/user/db"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
 	"gorm.io/gorm"
@@ -22,21 +24,41 @@ func NewUserRepository(db *gorm.DB) interfaces.UserRepository {
 	return &userDatabase{DB: db}
 }
 
-func (d *userDatabase) UserSignup(user requests.UserSignupReq) (response.UserValue, error) {
-	insertQury := `INSERT INTO users(username,email,password) VALUES ($1,$2,$3)
-				RETURNING id,username,email,password,is_active`
-	userVal := response.UserValue{}
-	err := d.DB.Raw(insertQury, user.Name, user.Email, user.Password).Scan(&userVal).Error
-	if err != nil {
-		return response.UserValue{}, err
-	} else {
-		fmt.Println(userVal)
-		return userVal, nil
+func (d *userDatabase) UserSignup(user cache.UserTemp) (cache.UserTemp, error) {
+	rdb_user := db.CreateRedisConnection(2)
+	rdb_email := db.CreateRedisConnection(3)
+	ctx := context.Background()
+
+	if res, _ := rdb_email.Exists(ctx, user.Email).Result(); res == 1 {
+		uniqueid, _ := rdb_email.Get(ctx, user.Email).Result()
+		dataByte, _ := rdb_user.Get(ctx, uniqueid).Result()
+		data := cache.UserTemp{}
+		json.Unmarshal([]byte(dataByte), &data)
+		return data, nil
 	}
+
+	user_marshel, _ := json.Marshal(user)
+	if err := rdb_user.Set(context.Background(), user.UniqueID, user_marshel, time.Hour*1).Err(); err != nil {
+		return cache.UserTemp{}, err
+	}
+
+	if err := rdb_email.Set(context.Background(), user.Email, user.UniqueID, time.Hour*1).Err(); err != nil {
+		return cache.UserTemp{}, err
+	}
+
+	return user, nil
 }
 
 func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
+	cfg := config.GetConfig()
 	qury := `SELECT id,username,email,created_at,password FROM users WHERE email = $1`
+
+	rdb := db.CreateRedisConnection(cfg.REDIS_EMAIL)
+	rdbStat, _ := rdb.Exists(context.Background(), user.Email).Result()
+	if rdbStat == 1 {
+		return response.UserValue{}, fmt.Errorf("account activation required: please check your email to verify and activate your account")
+	}
+
 	userVal := response.UserValue{}
 
 	if err := d.DB.Raw(qury, user.Email).Scan(&userVal).Error; err != nil {
@@ -58,8 +80,9 @@ func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, er
 }
 
 func (d *userDatabase) StoreOtpAndUniqueID(userid, otp string) error {
-	rdb := db.CreateRedisConnection(1)
-	status := rdb.Set(context.Background(), userid, otp, time.Minute*2)
+	cfg := config.GetConfig()
+	rdb := db.CreateRedisConnection(cfg.REDIS_OTP)
+	status := rdb.Set(context.Background(), userid, otp, time.Minute*5)
 	if status.Err() != nil {
 		return status.Err()
 	} else {
@@ -67,26 +90,35 @@ func (d *userDatabase) StoreOtpAndUniqueID(userid, otp string) error {
 	}
 }
 
-func (d *userDatabase) VerifyUserAccount(userid, otp string) (response.UserValue, error) {
-	rdb := db.CreateRedisConnection(1)
-	redis_res := rdb.Get(context.Background(), userid)
-	db_stored_otp, redis_err := redis_res.Result()
-	if redis_err != nil {
-		if errors.Is(redis_err, redis.Nil) {
-			return response.UserValue{}, errors.New("the OTP has expired. Please generate a new OTP and try again")
-		}
-		return response.UserValue{}, redis_err
+func (d *userDatabase) CreateNewUser(user cache.UserTemp) (response.UserValue, error) {
+	newQury := `
+	WITH inserted_user AS (
+		INSERT INTO users (username, email, password, is_verified)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at, is_verified, is_banned, username, email, is_premium
+	)
+	INSERT INTO profiles (user_id, name)
+	VALUES ((SELECT id FROM inserted_user), (SELECT username FROM inserted_user))
+	`
+	var userVal response.UserValue
+	if err := d.DB.Raw(newQury, user.Username, user.Email, user.Password, true).Scan(&userVal).Error; err != nil {
+		return response.UserValue{}, err
 	}
 
-	if db_stored_otp == otp {
-		qury := `UPDATE users SET is_verified = true WHERE id = $1 
-				RETURNING id,username,email,created_at,password,is_verified`
-		userVal := response.UserValue{}
-		if err := d.DB.Raw(qury, userid).Scan(&userVal).Error; err != nil {
-			return response.UserValue{}, err
-		}
-		return userVal, nil
-	} else {
-		return response.UserValue{}, errors.New("invalid otp provided")
+	rdb_email := db.CreateRedisConnection(config.GetConfig().REDIS_EMAIL)
+	if err := rdb_email.Del(context.Background(), user.Email).Err(); err != nil {
+		log.Println(err.Error())
 	}
+
+	return userVal, nil
+}
+
+func (d *userDatabase) EmailSearchOnDatabase(email string) (int, error) {
+	qury := `SELECT COUNT(*) FROM users WHERE email = $1`
+	var count int
+	if err := d.DB.Raw(qury, email).Scan(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

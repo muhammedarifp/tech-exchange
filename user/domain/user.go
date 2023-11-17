@@ -14,18 +14,19 @@ type Users struct {
 	Is_admin    bool      `gorm:"NOT NULL; default:false"`
 	Is_Premium  bool      `gorm:"NOT NULL; default:false"`
 	Is_active   bool      `gorm:"NOT NULL; default:true"`
+	Is_banned   bool      `gorm:"NOT NULL; default:false"`
 	Is_verified bool      `gorm:"NOT NULL; default:false"`
 }
 
 type Profiles struct {
 	ID          uint   `gorm:"primaryKey"`
 	UserID      uint   `gorm:"foreignKey:UserID"`
-	Name        string `gorm:"default:USER"`
-	Profile_img string `gorm:""`
-	Bio         string `gorm:""`
-	City        string `gorm:""`
-	Github      string `gorm:""`
-	Linkedin    string `gorm:""`
+	Name        string `gorm:""`
+	Profile_img string `gorm:"default:''"`
+	Bio         string `gorm:"default:''"`
+	City        string `gorm:"default:''"`
+	Github      string `gorm:"default:''"`
+	Linkedin    string `gorm:"default:''"`
 }
 
 type Badges struct {

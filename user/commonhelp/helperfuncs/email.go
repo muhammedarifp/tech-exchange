@@ -1,16 +1,15 @@
 package helperfuncs
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
 
 	"github.com/muhammedarifp/user/config"
-	"github.com/muhammedarifp/user/db"
 	"gopkg.in/gomail.v2"
 )
+
+var ()
 
 func SendVerificationMail(useremail, otp, unique string) bool {
 	cfg := config.GetConfig()
@@ -120,20 +119,103 @@ func SendVerificationMail(useremail, otp, unique string) bool {
 
 }
 
-// Verify user enter otp
-func VerifyUserOtp(otp, userid string) (bool, error) {
-	rdb := db.CreateRedisConnection(1)
-	val := rdb.Get(context.Background(), userid)
-	db_stored_otp, dberr := val.Result()
-	if dberr != nil {
-		return false, dberr
+func SendAccountBannedMail(to string, username string) bool {
+	template := `
+	<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Banned</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #e44d26;
+            padding: 10px;
+            text-align: center;
+            color: #ffffff;
+            border-radius: 5px 5px 0 0;
+        }
+
+        h1 {
+            color: #e44d26;
+        }
+
+        p {
+            color: #333333;
+            line-height: 1.5;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #e44d26;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #777777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Account Banned</h1>
+        </div>
+        <p>Dear ` + username + `,</p>
+        <p>We regret to inform you that your account has been banned due to a violation of our terms of service.</p>
+        <p>If you believe this is an error or would like to appeal the decision, please contact our support team.</p>
+        <a class="cta-button" href="mailto:support@example.com">Contact Support</a>
+    </div>
+    <div class="footer">
+        <p>Thank you for using our service. © 2023 Your Company. All rights reserved.</p>
+    </div>
+</body>
+
+</html>
+	`
+
+	cfg := config.GetConfig()
+	m := gomail.NewMessage()
+	m.SetHeader("From", cfg.EMAIL)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", "Accout")
+
+	m.SetBody("text/html", template)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, cfg.EMAIL, cfg.EMAIL_PASSWORD)
+	err := d.DialAndSend(m)
+	if err != nil {
+		fmt.Println("errorrr : ", err.Error())
+		return false
+	} else {
+		return true
 	}
 
-	if db_stored_otp != otp {
-		return false, errors.New("incorrect otp found")
-	}
-
-	return true, nil
 }
 
 // Create random number

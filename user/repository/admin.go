@@ -32,3 +32,17 @@ func (d *adminDatabase) AdminLogin(admin requests.AdminRequest) (response.AdminV
 
 	return adminVal, nil
 }
+
+func (d *adminDatabase) BanUser(userid string) (response.UserValue, error) {
+	qury := `UPDATE users SET is_banned = true WHERE id = $1 RETURNING id,username,email,is_verified,is_banned`
+	userVal := response.UserValue{}
+	if err := d.DB.Raw(qury, userid).Scan(&userVal).Error; err != nil {
+		return response.UserValue{}, err
+	}
+
+	if userVal.ID == 0 {
+		return response.UserValue{}, errors.New("user not found")
+	}
+
+	return userVal, nil
+}

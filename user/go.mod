@@ -3,9 +3,11 @@ module github.com/muhammedarifp/user
 go 1.21.0
 
 require (
+	github.com/aidarkhanov/nanoid v1.0.8
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.1
 	github.com/spf13/viper v1.17.0
 	github.com/swaggo/http-swagger v1.3.4

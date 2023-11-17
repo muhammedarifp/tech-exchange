@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
 	"github.com/muhammedarifp/user/commonhelp/requests"
@@ -39,4 +40,20 @@ func (u *adminUsecase) AdminLogin(admin requests.AdminRequest) (response.AdminVa
 	token := helperfuncs.CreateJwtToken(adminVal.ID, true)
 
 	return adminVal, token, nil
+}
+
+func (u *adminUsecase) BanUser(userid string) (response.UserValue, error) {
+	userval, repoErr := u.AdminRepo.BanUser(userid)
+	if repoErr != nil {
+		return response.UserValue{}, repoErr
+	}
+
+	go func() {
+		if status := helperfuncs.SendAccountBannedMail(userval.Email, userval.Username); status {
+			fmt.Println(true)
+		} else {
+			fmt.Println(false)
+		}
+	}()
+	return userval, nil
 }

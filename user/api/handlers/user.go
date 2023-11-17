@@ -97,7 +97,7 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 	if usecaseErr == nil {
 		jsonVal, marshelErr := json.Marshal(response.Response{
 			StatusCode: 201,
-			Message:    "user signup successfully",
+			Message:    "Temporary storage successful. Use the OTP provided to verify your account within 2 hours",
 			Data:       userval,
 			Errors:     nil,
 		})
@@ -196,30 +196,31 @@ func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Request) {
+	qury := r.URL.Query()
+	unique := qury["unique"]
+	fmt.Println(unique)
 	// Get the token from the request header.
-	token := r.Header.Get("Token")
 	w.Header().Set("Content-Type", "application/json")
 	// Check if the token is empty.
-	if token == "" {
+	if len(unique) == 0 {
 		// Return a 400 Bad Request error with the message "token is invalid".
+		w.WriteHeader(400)
 		json_resp, _ := json.Marshal(response.ReqOtpResp{
 			StatusCode: 400,
 			Status:     false,
-			Message:    "The token you provided is invalid or has expired. Please generate a new token and try again",
+			Message:    "your unique activation token is empty",
 			Error:      "token is invalid",
 		})
 		w.Write(json_resp)
 		return
 	}
 
-	// Call the `UserEmailVerificationSend()` method on the `UserUseCase` to verify the email address.
-	_, err := u.userUserCase.UserEmailVerificationSend(token)
-	if err != nil {
-		// Return a 500 Internal Server Error error with the message "Something went wrong".
+	if _, err := u.userUserCase.UserEmailVerificationSend(unique[0]); err != nil {
+		w.WriteHeader(400)
 		json_resp, _ := json.Marshal(response.ReqOtpResp{
-			StatusCode: 500,
+			StatusCode: 400,
 			Status:     false,
-			Message:    "Something went wrong while processing your request. Please try again later",
+			Message:    "your unique activation token is invalid",
 			Error:      err.Error(),
 		})
 		w.Write(json_resp)
@@ -238,18 +239,18 @@ func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Reque
 
 func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the token from the request header.
-	token := r.Header.Get("Token")
+	qurys := r.URL.Query()
+	unique := qurys.Get("unique")
+	otp := qurys.Get("otp")
 	w.Header().Set("Content-Type", "application/json")
 
 	// Decode the request body.
-	var userEnterVal requests.UserEmailVerificationReq
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&userEnterVal); err != nil {
+	if unique == "" || otp == "" {
 		json_resp, _ := json.Marshal(response.VerifyOtpResp{
 			StatusCode: 400,
 			Status:     false,
-			Message:    "The request body could not be parsed into a valid UserEmailVerificationReq object",
-			Error:      "CAN_NOT_BIND",
+			Message:    "unique token or otp is empty",
+			Error:      "SOMETHING_WENT_WRONG",
 			Data:       nil,
 		})
 		w.Write(json_resp)
@@ -257,7 +258,7 @@ func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Validate the OTP.
-	userVal, err := u.userUserCase.UserEmailVerify(userEnterVal, token)
+	userVal, err := u.userUserCase.UserEmailVerify(unique, otp)
 	if err != nil {
 		json_resp, _ := json.Marshal(response.VerifyOtpResp{
 			StatusCode: 400,
