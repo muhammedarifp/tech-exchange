@@ -14,5 +14,10 @@ type UserRepository interface {
 	StoreOtpAndUniqueID(unique, otp string) error
 	EmailSearchOnDatabase(email string) (int, error)
 
-	// pending
+	// today
+	FetchUserProfileUsingID(userid string) (response.UserProfileValue, error)                              // get
+	UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error) // put
+	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error)
+	DeleteUserAccount(userid string) (response.UserValue, error)
+	// FollowOrUnfollowOthers()
 }

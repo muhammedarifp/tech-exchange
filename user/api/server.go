@@ -7,8 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/muhammedarifp/user/api/handlers"
 	"github.com/muhammedarifp/user/api/middleware"
-	_ "github.com/muhammedarifp/user/cmd/docs"
-	httpSwagger "github.com/swaggo/http-swagger"
+	//_ "github.com/muhammedarifp/user/cmd/docs"
 )
 
 type ServerHTTP struct {
@@ -33,7 +32,12 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 	engine.Use(middleware.LoggingMiddleware)
 
 	// Serve the Swagger UI documentation.
-	engine.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	// engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
+	// engine.Handle("/api/users/swagger.json", http.FileServer(http.Dir("docs")))
+
+	// Serve Swagger UI
+	engine.PathPrefix("/api/users/swagger/*any").Handler(http.StripPrefix("/api/users/swagger/", http.FileServer(http.Dir("docs"))))
+	engine.Handle("/swagger.json", http.FileServer(http.Dir("docs")))
 
 	// Create a subrouter for the user routes.
 	userRouter := engine.PathPrefix("/api/users").Subrouter()
@@ -47,6 +51,8 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 	// Add the user handlers.
 	userRouter.HandleFunc("/signup", userHandler.UserSignupHandler).Methods("POST")
 	userRouter.HandleFunc("/login", userHandler.UserLoginHandler).Methods("POST")
+	userRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
+	userRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
 
 	// Add the admin handler.
 	adminRouter.HandleFunc("/login", adminHandler.AdminLoginHandler).Methods("POST")
@@ -56,8 +62,8 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 	userAuthRouter.Use(middleware.AuthUserMiddleware)
 
 	// Add the user authentication handlers.
-	userRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
-	userRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
+	userAuthRouter.HandleFunc("/view-profile", userHandler.FetchUserProfileUsingIDHandler).Methods("GET") //
+	userAuthRouter.HandleFunc("/delete-acc", userHandler.DeleteUserAccount).Methods("DELETE")             // working
 
 	return &ServerHTTP{engine: engine}
 }

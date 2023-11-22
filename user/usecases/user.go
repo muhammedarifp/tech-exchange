@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aidarkhanov/nanoid"
+	"github.com/asaskevich/govalidator"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/muhammedarifp/user/commonhelp/cache"
 	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
@@ -39,8 +41,9 @@ func (u *userUseCase) UserSignup(user requests.UserSignupReq) (cache.UserTemp, e
 		return cache.UserTemp{}, searchErr
 	}
 
+	fmt.Println(count)
 	// If the email count is greater than 1, it means the email already exists
-	if count > 1 {
+	if count >= 1 {
 		return cache.UserTemp{}, errors.New("this email already exists")
 	}
 
@@ -77,8 +80,13 @@ func (u *userUseCase) UserLogin(user requests.UserLoginReq) (response.UserValue,
 	userVal, err := u.userRepo.UserLogin(user)
 
 	// Check for errors during user retrieval
+	var responseEmpty response.UserValue
 	if err != nil {
-		return response.UserValue{}, 400, err
+		return responseEmpty, 400, err
+	}
+
+	if !userVal.Is_active {
+		return responseEmpty, 400, errors.New("account creation failed. your account has been permanently deactivated. if you believe this is an error, please contact support")
 	}
 
 	// Check if the entered email and password match the retrieved user's credentials
@@ -174,4 +182,58 @@ func (u *userUseCase) UserEmailVerify(unique, otp string) (response.UserValue, e
 		// Return an empty user value and an error indicating an invalid OTP
 		return response.UserValue{}, errors.New("invalid OTP provided")
 	}
+}
+
+// new //....................
+
+func (u *userUseCase) FetchUserProfileUsingID(userid string) (response.UserProfileValue, error) {
+	userProfile, repoErr := u.userRepo.FetchUserProfileUsingID(userid)
+	if repoErr != nil {
+		return response.UserProfileValue{}, repoErr
+	}
+
+	return userProfile, nil
+}
+
+func (u *userUseCase) UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error) {
+	// validate struct
+	var userProfilrEmpty response.UserProfileValue
+	if err := validator.New().Struct(&profile); err != nil {
+		return userProfilrEmpty, err
+	}
+
+	//
+	userProfile, repoErr := u.userRepo.UpdateUserProfile(profile, userid)
+	if repoErr != nil {
+		return userProfilrEmpty, repoErr
+	}
+
+	return userProfile, nil
+}
+
+func (u *userUseCase) UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error) {
+	var userValueEmpty response.UserValue
+	if !govalidator.IsEmail(account.Email) {
+		return userValueEmpty, errors.New("invalid email provided")
+	}
+
+	userVal, repoErr := u.userRepo.UpdateUserEmail(account, userid)
+	if repoErr != nil {
+		return userValueEmpty, repoErr
+	}
+
+	return userVal, nil
+}
+
+func (u *userUseCase) DeleteUserAccount(userid string) (response.UserValue, error) {
+	var userValueEmpty response.UserValue
+	if userid == "" {
+		return userValueEmpty, errors.New("UserID cannot be empty")
+	}
+	userVal, repoErr := u.userRepo.DeleteUserAccount(userid)
+	if repoErr != nil {
+		return userValueEmpty, repoErr
+	}
+
+	return userVal, nil
 }

@@ -8,10 +8,12 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	_ "github.com/muhammedarifp/user/cmd/docs"
 	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	services "github.com/muhammedarifp/user/usecases/interfaces"
+	_ "github.com/swaggo/http-swagger"
 )
 
 type UserHandler struct {
@@ -24,13 +26,15 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	}
 }
 
-// @Summary Get user by ID
-// @Description Get a user by its ID
-// @ID get-user-by-id
-// @Param id path int true "User ID"
-// @Success 200 {object} User
-// @Failure 404 {string} string "User not found"
-// @Router /users/{id} [get]
+// @Summary User Signup
+// @Description Register a new user
+// @ID user-signup
+// @Accept  json
+// @Produce  json
+// @Param req body UserSignupReq true "User signup request"
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Router /user/signup [post]
 func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -279,4 +283,193 @@ func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Reques
 		Data:       userVal,
 	})
 	w.Write(json_resp)
+}
+
+// FetchUserProfileUsingID(userid string) (response.UserProfileValue, error)                              // get - done
+// UpdateUserProfile(profile response.UserProfileValue, userid string) (response.UserProfileValue, error) // put - done
+// UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error)                 // put - progressing ..
+// DeleteUserAccount(userid string) (response.UserValue, error) 										  // delete - next
+
+func (u *UserHandler) FetchUserProfileUsingIDHandler(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Token")
+	w.Header().Set("Content-Type", "application/json")
+
+	// token variable iclude empty value
+	if token == "" {
+		// Invalid token provided
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "1invalid auth token provided",
+			Data:       nil,
+			Errors:     "Invalid auth token provided",
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+
+	// Fetch userid from token
+	userid, tokenFetchErr := helperfuncs.GetUserIdFromJwt(token)
+	if tokenFetchErr != nil {
+		// userid is not available in this token
+		// Server Respond error
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "2invalid auth token provided",
+			Data:       nil,
+			Errors:     tokenFetchErr.Error(),
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+
+	//
+	profileVal, profileErr := u.userUserCase.FetchUserProfileUsingID(userid)
+	if profileErr != nil {
+		// profile value fetching error
+		// Server respond error
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "3invalid auth token provided",
+			Data:       nil,
+			Errors:     profileErr.Error(),
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+
+	// Success response
+	marshelResp, marshelErr := json.Marshal(response.Response{
+		StatusCode: 400,
+		Message:    "invalid auth token provided",
+		Data:       profileVal,
+		Errors:     nil,
+	})
+	if marshelErr != nil {
+		log.Println(marshelErr.Error())
+	}
+	w.WriteHeader(200)
+	w.Write(marshelResp)
+}
+
+func (u *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+	// Fetch Auth Token
+	token := w.Header().Get("Token")
+	if token == "" {
+		// Invalid token provided
+		// Write this soon !!
+		return
+	}
+	userid, tokenErr := helperfuncs.GetUserIdFromJwt(token)
+	if tokenErr != nil {
+		// handle this error
+		// This error is failed to fetch user id from token
+		return
+	}
+
+	// Case : 2
+	//
+	body, bodyErr := io.ReadAll(r.Body)
+	if bodyErr != nil {
+		// handle body reading error
+		return
+	}
+
+	var profile requests.UserPofileUpdate
+	if json.Unmarshal(body, profile) != nil {
+		// error
+		// handler or respond that error
+	}
+
+	profileVal, usecaseErr := u.userUserCase.UpdateUserProfile(profile, userid)
+	if usecaseErr != nil {
+		// Handler this usecase error
+		//  return this error message only
+		return
+	}
+
+	// Success response
+	fmt.Println(profileVal)
+	// Finally updated user profile
+}
+
+// func (u *UserHandler) UpdateUserEmail(w http.ResponseWriter, r *http.Request) {
+// 	u.userUserCase.UpdateUserEmail()
+// }
+
+func (u *UserHandler) DeleteUserAccount(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Token")
+	w.Header().Set("Content-Type", "application/json")
+	if token == "" {
+		// Case is token is empty or null
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "invalid auth token provided",
+			Data:       nil,
+			Errors:     "Invalid auth token provided",
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+	userid, tokenErr := helperfuncs.GetUserIdFromJwt(token)
+	if tokenErr != nil {
+		// case is userid fetch error from user auth token
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "invalid auth token provided",
+			Data:       nil,
+			Errors:     "Invalid auth token provided",
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+	userVal, usecaseErr := u.userUserCase.DeleteUserAccount(userid)
+	if usecaseErr != nil {
+		// handle this case
+		// This is a usecase layer error
+		marshelResp, marshelErr := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     usecaseErr.Error(),
+		})
+		if marshelErr != nil {
+			log.Println(marshelErr.Error())
+		}
+		w.WriteHeader(400)
+		w.Write(marshelResp)
+		return
+	}
+
+	// Success response
+	marshelResp, marshelErr := json.Marshal(response.Response{
+		StatusCode: 200,
+		Message:    "user account deactivated",
+		Data:       userVal,
+		Errors:     nil,
+	})
+	if marshelErr != nil {
+		log.Println(marshelErr.Error())
+	}
+	w.WriteHeader(200)
+	w.Write(marshelResp)
 }

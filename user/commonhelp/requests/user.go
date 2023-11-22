@@ -14,3 +14,11 @@ type UserSignupReq struct {
 type UserEmailVerificationReq struct {
 	Otp string `json:"otp,omitempty" validate:"required,min=5"`
 }
+
+type UserPofileUpdate struct {
+	Name     string `json:"name"`
+	Bio      string `json:"bio"`
+	City     string `json:"city"`
+	Github   string `json:"github"`
+	Linkedin string `json:"linkedin"`
+}

@@ -51,7 +51,7 @@ func (d *userDatabase) UserSignup(user cache.UserTemp) (cache.UserTemp, error) {
 
 func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue, error) {
 	cfg := config.GetConfig()
-	qury := `SELECT id,username,email,created_at,password FROM users WHERE email = $1`
+	qury := `SELECT id,username,email,created_at,password,is_active FROM users WHERE email = $1`
 
 	rdb := db.CreateRedisConnection(cfg.REDIS_EMAIL)
 	rdbStat, _ := rdb.Exists(context.Background(), user.Email).Result()
@@ -121,4 +121,48 @@ func (d *userDatabase) EmailSearchOnDatabase(email string) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (d *userDatabase) FetchUserProfileUsingID(userid string) (response.UserProfileValue, error) {
+	var profileVal response.UserProfileValue
+	qury := `SELECT id,user_id,name,profile_img,bio,city,github,linkedin FROM profiles WHERE user_id = $1`
+	if err := d.DB.Raw(qury, userid).Scan(&profileVal).Error; err != nil {
+		return response.UserProfileValue{}, err
+	}
+
+	return profileVal, nil
+}
+
+func (d *userDatabase) UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error) {
+	qury := `UPDATE profiles
+			SET name = $1, bio = $2, city = $3, github = $4, linkedin = $5 
+			WHERE user_id = $6
+			RETURNING id,user_id,name,profile_img,bio,city,github,linkedin
+			`
+	var userProfile response.UserProfileValue
+	if err := d.DB.Raw(qury, profile.Name, profile.Bio, profile.City, profile.Github, profile.Linkedin, userid).Scan(&userProfile).Error; err != nil {
+		return response.UserProfileValue{}, err
+	}
+
+	return userProfile, nil
+}
+
+func (d *userDatabase) UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error) {
+	qury := `UPDATE users SET email = $1 WHERE id = $2 RETURNING id`
+	var userVal response.UserValue
+	if err := d.DB.Raw(qury, account.Email, userid).Scan(&userVal).Error; err != nil {
+		return response.UserValue{}, err
+	}
+
+	return userVal, nil
+}
+
+func (d *userDatabase) DeleteUserAccount(userid string) (response.UserValue, error) {
+	qury := `UPDATE users SET is_active = false WHERE id = $1`
+	var userVal response.UserValue
+	if err := d.DB.Raw(qury, userid).Scan(&userVal).Error; err != nil {
+		return response.UserValue{}, err
+	}
+
+	return userVal, nil
 }

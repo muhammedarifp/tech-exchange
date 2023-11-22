@@ -18,6 +18,8 @@ func main() {
 	cfg := config.LoadConfig()
 	server, err := di.InitializeAPI(cfg)
 
+	//cronejobs.InitCronJobs()
+
 	if err != nil {
 		fmt.Println("1. ", err.Error())
 	}
