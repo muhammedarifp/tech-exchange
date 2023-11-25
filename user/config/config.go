@@ -7,17 +7,21 @@ import (
 )
 
 type Config struct {
-	APP_PORT       string
-	DB_USER        string
-	DB_NAME        string
-	DB_PASSWORD    string
-	DB_PORT        string
-	JWT_SECRET     string
-	EMAIL          string
-	EMAIL_PASSWORD string
-	REDIS_OTP      int
-	REDIS_EMAIL    int
-	REDIS_USER     int
+	APP_PORT              string
+	DB_USER               string
+	DB_NAME               string
+	DB_PASSWORD           string
+	DB_PORT               string
+	JWT_SECRET            string
+	EMAIL                 string
+	EMAIL_PASSWORD        string
+	REDIS_OTP             int
+	REDIS_EMAIL           int
+	REDIS_USER            int
+	AWS_REGION            string
+	AWS_ACCESS_KEYID      string
+	AWS_SECRET_ACCESS_KEY string
+	BUCKET_NAME           string
 }
 
 var cfg Config
@@ -34,6 +38,6 @@ func LoadConfig() Config {
 	return cfg
 }
 
-func GetConfig() *Config {
-	return &cfg
+func GetConfig() Config {
+	return cfg
 }

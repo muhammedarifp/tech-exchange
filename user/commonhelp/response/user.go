@@ -17,7 +17,7 @@ type UserValue struct {
 }
 
 type UserProfileValue struct {
-	ID         uint   `json:"id"`
+	ID         uint   `json:"-"`
 	UserID     uint   `json:"user_id"`
 	Name       string `json:"name"`
 	ProfileImg string `json:"profile_img"`

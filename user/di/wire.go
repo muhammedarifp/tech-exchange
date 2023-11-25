@@ -3,7 +3,8 @@ package di
 // import (
 // 	"github.com/google/wire"
 // 	"github.com/muhammedarifp/user/api"
-// 	"github.com/muhammedarifp/user/api/handlers"
+// 	adminhandlers "github.com/muhammedarifp/user/api/handlers/admin"
+// 	userhandlers "github.com/muhammedarifp/user/api/handlers/user"
 // 	"github.com/muhammedarifp/user/config"
 // 	"github.com/muhammedarifp/user/db"
 // 	"github.com/muhammedarifp/user/repository"
@@ -20,8 +21,8 @@ package di
 // 		usecases.NewUserUseCase,
 // 		usecases.NewAdminUsecase,
 
-// 		handlers.NewUserHandler,
-// 		handlers.NewAdminHandler,
+// 		userhandlers.NewUserHandler,
+// 		adminhandlers.NewAdminHandler,
 
 // 		api.NewServerHTTP,
 // 	)

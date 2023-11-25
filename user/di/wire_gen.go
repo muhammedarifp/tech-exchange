@@ -8,7 +8,8 @@ package di
 
 import (
 	"github.com/muhammedarifp/user/api"
-	"github.com/muhammedarifp/user/api/handlers"
+	handlers2 "github.com/muhammedarifp/user/api/handlers/admin"
+	"github.com/muhammedarifp/user/api/handlers/user"
 	"github.com/muhammedarifp/user/config"
 	"github.com/muhammedarifp/user/db"
 	"github.com/muhammedarifp/user/repository"
@@ -27,7 +28,7 @@ func InitializeAPI(cfg config.Config) (*api.ServerHTTP, error) {
 	userHandler := handlers.NewUserHandler(userUseCase)
 	adminRepository := repository.NewAdminRepository(gormDB)
 	adminUsecase := usecases.NewAdminUsecase(adminRepository)
-	adminHandler := handlers.NewAdminHandler(adminUsecase)
+	adminHandler := handlers2.NewAdminHandler(adminUsecase)
 	serverHTTP := api.NewServerHTTP(userHandler, adminHandler)
 	return serverHTTP, nil
 }

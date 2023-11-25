@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/muhammedarifp/user/api/handlers"
+	adminhandlers "github.com/muhammedarifp/user/api/handlers/admin"
+	userhandlers "github.com/muhammedarifp/user/api/handlers/user"
 	"github.com/muhammedarifp/user/api/middleware"
 	//_ "github.com/muhammedarifp/user/cmd/docs"
 )
@@ -24,7 +25,7 @@ type ServerHTTP struct {
 // @Success 201 {object} UserResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/users/create [post]
-func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.AdminHandler) *ServerHTTP {
+func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhandlers.AdminHandler) *ServerHTTP {
 	// Create a new mux router.
 	engine := mux.NewRouter()
 
@@ -63,7 +64,9 @@ func NewServerHTTP(userHandler *handlers.UserHandler, adminHandler *handlers.Adm
 
 	// Add the user authentication handlers.
 	userAuthRouter.HandleFunc("/view-profile", userHandler.FetchUserProfileUsingIDHandler).Methods("GET") //
-	userAuthRouter.HandleFunc("/delete-acc", userHandler.DeleteUserAccount).Methods("DELETE")             // working
+	userAuthRouter.HandleFunc("/update-profile", userHandler.UpdateUserProfile).Methods("PUT")
+	userAuthRouter.HandleFunc("/delete-acc", userHandler.DeleteUserAccount).Methods("DELETE") // working
+	userAuthRouter.HandleFunc("/upload-profileimg", userHandler.UploadNewProfileImage).Methods("POST")
 
 	return &ServerHTTP{engine: engine}
 }

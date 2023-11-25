@@ -166,3 +166,13 @@ func (d *userDatabase) DeleteUserAccount(userid string) (response.UserValue, err
 
 	return userVal, nil
 }
+
+func (d *userDatabase) UploadProfileImage(imageurl string, userid string) (response.UserProfileValue, error) {
+	qury := `UPDATE profiles SET profile_img = $1 WHERE user_id = $2 RETURNING *`
+	var profileVal response.UserProfileValue
+	if err := d.DB.Raw(qury, imageurl, userid).Scan(&profileVal).Error; err != nil {
+		return profileVal, err
+	}
+
+	return profileVal, nil
+}

@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"mime/multipart"
+
 	"github.com/muhammedarifp/user/commonhelp/cache"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
@@ -9,13 +11,17 @@ import (
 type UserUseCase interface {
 	UserSignup(user requests.UserSignupReq) (cache.UserTemp, error)
 	UserLogin(user requests.UserLoginReq) (response.UserValue, int, error)
+
+	// user verification
 	UserEmailVerificationSend(token string) (bool, error)
 	UserEmailVerify(unique, otp string) (response.UserValue, error)
 
-	// new
+	// user profile
+	FetchUserProfileUsingID(userid string) (response.UserProfileValue, error)                                                  // get
+	UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error)                     // put
+	UploadNewProfilePhoto(photo multipart.File, header multipart.FileHeader, userid string) (response.UserProfileValue, error) // post
 
-	FetchUserProfileUsingID(userid string) (response.UserProfileValue, error)                              // get
-	UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error) // put
-	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error)                 // put
-	DeleteUserAccount(userid string) (response.UserValue, error)                                           // delete
+	// user account
+	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error) // put
+	DeleteUserAccount(userid string) (response.UserValue, error)                           // delete
 }
