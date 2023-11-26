@@ -1,9 +1,12 @@
 package main
 
 import (
-	"github.com/muhammedarifp/content/api"
+	"github.com/muhammedarifp/content/config"
+	"github.com/muhammedarifp/content/di"
 )
 
 func main() {
-	api.NewServeHTTP()
+	cfg, _ := config.LoadConfig()
+	server, _ := di.InitWire(cfg)
+	server.Start()
 }
