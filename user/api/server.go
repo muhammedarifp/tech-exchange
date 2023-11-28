@@ -35,38 +35,28 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 	// Serve the Swagger UI documentation.
 	// engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
 	// engine.Handle("/api/users/swagger.json", http.FileServer(http.Dir("docs")))
+	userRouter := engine.PathPrefix("/api/v1/users").Subrouter()
+	userAuthRouter := engine.PathPrefix("/api/v1/users").Subrouter()
+	adminRouter := engine.PathPrefix("/api/v1/admins").Subrouter()
 
-	// Serve Swagger UI
-	engine.PathPrefix("/api/users/swagger/*any").Handler(http.StripPrefix("/api/users/swagger/", http.FileServer(http.Dir("docs"))))
-	engine.Handle("/swagger.json", http.FileServer(http.Dir("docs")))
+	// User endpoints
+	userRouter.HandleFunc("/signup", userHandler.Signup).Methods("POST")
+	userRouter.HandleFunc("/login", userHandler.Login).Methods("POST")
+	userRouter.HandleFunc("/otp/send", userHandler.RequestOtp).Methods("POST")
+	userRouter.HandleFunc("/otp/verify", userHandler.VerifyOtp).Methods("POST")
 
-	// Create a subrouter for the user routes.
-	userRouter := engine.PathPrefix("/api/users").Subrouter()
+	// Admin endpoints
+	adminRouter.HandleFunc("/login", adminHandler.Login).Methods("POST")
+	adminRouter.HandleFunc("/users/{userid}/ban", adminHandler.BanUser).Methods("POST")
 
-	// Create a subrouter for the user authentication routes.
-	userAuthRouter := engine.PathPrefix("/api/users").Subrouter()
+	// User authentication routes
+	userAuthRouter.Use(middleware.AuthMiddleware)
 
-	// Create a subrouter for the admin routes.
-	adminRouter := engine.PathPrefix("/api/admins").Subrouter()
-
-	// Add the user handlers.
-	userRouter.HandleFunc("/signup", userHandler.UserSignupHandler).Methods("POST")
-	userRouter.HandleFunc("/login", userHandler.UserLoginHandler).Methods("POST")
-	userRouter.HandleFunc("/otp/send", userHandler.UserRequestOtpHandler).Methods("POST")
-	userRouter.HandleFunc("/otp/verify", userHandler.VerifyUserOtpHandler).Methods("POST")
-
-	// Add the admin handler.
-	adminRouter.HandleFunc("/login", adminHandler.AdminLoginHandler).Methods("POST")
-	adminRouter.HandleFunc("/users/ban/{userid}", adminHandler.AdminBanUserHandler)
-
-	// Add a middleware to the user authentication routes to check if the user is authenticated.
-	userAuthRouter.Use(middleware.AuthUserMiddleware)
-
-	// Add the user authentication handlers.
-	userAuthRouter.HandleFunc("/view-profile", userHandler.FetchUserProfileUsingIDHandler).Methods("GET") //
-	userAuthRouter.HandleFunc("/update-profile", userHandler.UpdateUserProfile).Methods("PUT")
-	userAuthRouter.HandleFunc("/delete-acc", userHandler.DeleteUserAccount).Methods("DELETE") // working
-	userAuthRouter.HandleFunc("/upload-profileimg", userHandler.UploadNewProfileImage).Methods("POST")
+	userAuthRouter.HandleFunc("/profile", userHandler.ViewProfile).Methods("GET")
+	userAuthRouter.HandleFunc("/account", userHandler.ViewAccount).Methods("GET")
+	userAuthRouter.HandleFunc("/update-profile", userHandler.UpdateProfile).Methods("PUT")
+	userAuthRouter.HandleFunc("/delete-account", userHandler.DeleteAccount).Methods("DELETE")
+	userAuthRouter.HandleFunc("/upload-profile-image", userHandler.UploadProfileImage).Methods("POST")
 
 	return &ServerHTTP{engine: engine}
 }

@@ -25,8 +25,8 @@ func CreateJwtToken(userid uint, is_admin bool) string {
 }
 
 func GetUserIdFromJwt(token string) (string, error) {
+	cfg := config.GetConfig()
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		cfg := config.GetConfig()
 		return []byte(cfg.JWT_SECRET), nil
 	})
 

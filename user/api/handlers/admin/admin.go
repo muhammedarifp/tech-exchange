@@ -23,7 +23,7 @@ func NewAdminHandler(usecase interfaces.AdminUsecase) *AdminHandler {
 	}
 }
 
-func (h *AdminHandler) AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AdminHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Set the response header to JSON.
 	w.Header().Set("Content-Type", "application/json")
 
@@ -95,7 +95,7 @@ func (h *AdminHandler) AdminLoginHandler(w http.ResponseWriter, r *http.Request)
 	w.Write(jsonResp)
 }
 
-func (h *AdminHandler) AdminBanUserHandler(w http.ResponseWriter, r *http.Request) {
+func (h *AdminHandler) BanUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userid := params["userid"]
 	w.Header().Set("Content-Type", "application/json")

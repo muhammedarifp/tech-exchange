@@ -6,7 +6,7 @@ import (
 	"github.com/muhammedarifp/content/domain"
 )
 
-type ContentResp struct {
+type ContentVal struct {
 	CreateAt        time.Time         `bson:"create_at"`
 	LastUpdate      time.Time         `bson:"last_update"`
 	UserID          string            `bson:"user_id"`

@@ -17,8 +17,10 @@ type UserRepository interface {
 	// today
 	FetchUserProfileUsingID(userid string) (response.UserProfileValue, error)                              // get
 	UpdateUserProfile(profile requests.UserPofileUpdate, userid string) (response.UserProfileValue, error) // put
-	UploadProfileImage(imageurl string, userid string) (response.UserProfileValue, error)
-	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error)
-	DeleteUserAccount(userid string) (response.UserValue, error)
+	UploadProfileImage(imageurl string, userid string) (response.UserProfileValue, error)                  //
+	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error)                 //
+	DeleteUserAccount(userid string) (response.UserValue, error)                                           //
+	//	FetchUserAccount(userid string) (response.UserValue, error)                                            // get
+	//
 	// FollowOrUnfollowOthers()
 }

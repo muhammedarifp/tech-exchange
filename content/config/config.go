@@ -9,6 +9,7 @@ import (
 type Config struct {
 	MONGO_PORT string
 	DB_NAME    string
+	JWT_SECRET string
 }
 
 var (

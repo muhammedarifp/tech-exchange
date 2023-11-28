@@ -1,9 +1,8 @@
 package requests
 
 type CreateNewPostRequest struct {
-	ThumbnailImg     string
-	Title            string
-	Body             string
-	Is_showReactions bool
-	Is_premium       bool
+	Title            string `json:"title"`
+	Body             string `json:"body"`
+	Is_showReactions bool   `json:"is_show_reactions"`
+	Is_premium       bool   `json:"is_premium"`
 }

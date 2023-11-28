@@ -12,7 +12,7 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 )
 
-func (u *UserHandler) FetchUserProfileUsingIDHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Token")
 	w.Header().Set("Content-Type", "application/json")
 
@@ -86,7 +86,7 @@ func (u *UserHandler) FetchUserProfileUsingIDHandler(w http.ResponseWriter, r *h
 }
 
 // Update user profile
-func (u *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// Fetch Auth Token
 	token := r.Header.Get("Token")
 
@@ -166,7 +166,7 @@ func (u *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 }
 
 // Upload new profile image
-func (u *UserHandler) UploadNewProfileImage(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) UploadProfileImage(w http.ResponseWriter, r *http.Request) {
 	userid, _ := helperfuncs.GetUserIdFromJwt(r.Header.Get("Token"))
 	maxsize := 5 * 1024 * 1024
 	if err := r.ParseMultipartForm(int64(maxsize)); err != nil { // max 10 mb ;

@@ -8,7 +8,7 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 )
 
-func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) RequestOtp(w http.ResponseWriter, r *http.Request) {
 	qury := r.URL.Query()
 	unique := qury["unique"]
 	fmt.Println(unique)
@@ -50,7 +50,7 @@ func (u *UserHandler) UserRequestOtpHandler(w http.ResponseWriter, r *http.Reque
 	w.Write(json_resp)
 }
 
-func (u *UserHandler) VerifyUserOtpHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) VerifyOtp(w http.ResponseWriter, r *http.Request) {
 	// Get the token from the request header.
 	qurys := r.URL.Query()
 	unique := qurys.Get("unique")

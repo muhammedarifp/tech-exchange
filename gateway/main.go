@@ -14,7 +14,7 @@ import (
 // }
 
 func main() {
-	http.HandleFunc("/api/users/", reverseProxy("http://localhost:8000/"))
+	http.HandleFunc("/api/v1/users/", reverseProxy("http://localhost:8000/"))
 	http.ListenAndServe(":8080", nil)
 }
 

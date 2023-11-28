@@ -70,7 +70,7 @@ func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue
 }
 
 func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, error) {
-	qury := `SELECT id,username,created_at,email,is_verified FROM users WHERE id = $1`
+	qury := `SELECT * FROM users WHERE id = $1`
 	userData := response.UserValue{}
 	err := d.DB.Raw(qury, userid).Scan(&userData).Error
 	if err != nil {

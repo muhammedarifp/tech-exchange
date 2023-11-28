@@ -35,7 +35,7 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 // @Success 201 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Router /user/signup [post]
-func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -114,7 +114,7 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Read the request body.
 	body, bodyErr := io.ReadAll(r.Body)
 	if bodyErr != nil {
