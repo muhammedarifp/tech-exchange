@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -158,6 +159,56 @@ func (h *AdminHandler) BanUser(w http.ResponseWriter, r *http.Request) {
 		StatusCode: 200,
 		Message:    userVal.Email + " This account banned",
 		Data:       userVal,
+		Errors:     nil,
+	})
+	if marshel_err != nil {
+		log.Fatal(marshel_err.Error())
+	}
+	w.Write(marshel_val)
+}
+
+func (h *AdminHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	page := params["page"]
+	fmt.Println(page)
+	pageInt, convErr := strconv.Atoi(page)
+	if convErr != nil {
+		w.WriteHeader(400)
+		marshel_val, marshel_err := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "somthing wrong",
+			Data:       nil,
+			Errors:     convErr.Error(),
+		})
+		if marshel_err != nil {
+			log.Fatal(marshel_err.Error())
+		}
+		w.Write(marshel_val)
+		return
+	}
+
+	users, err := h.AdminUsecase.GetallUsers(pageInt)
+	if err != nil {
+		w.WriteHeader(400)
+		marshel_val, marshel_err := json.Marshal(response.Response{
+			StatusCode: 400,
+			Message:    "somthing wrong",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
+		if marshel_err != nil {
+			log.Fatal(marshel_err.Error())
+		}
+		w.Write(marshel_val)
+		return
+	}
+
+	w.WriteHeader(200)
+	marshel_val, marshel_err := json.Marshal(response.Response{
+		StatusCode: 200,
+		Message:    "success",
+		Data:       users,
 		Errors:     nil,
 	})
 	if marshel_err != nil {

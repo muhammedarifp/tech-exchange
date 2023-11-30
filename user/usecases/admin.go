@@ -57,3 +57,12 @@ func (u *adminUsecase) BanUser(userid string) (response.UserValue, error) {
 	}()
 	return userval, nil
 }
+
+func (u *adminUsecase) GetallUsers(page int) ([]response.UserValue, error) {
+	users, err := u.AdminRepo.GetallUsers(page)
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+}

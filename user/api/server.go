@@ -8,23 +8,14 @@ import (
 	adminhandlers "github.com/muhammedarifp/user/api/handlers/admin"
 	userhandlers "github.com/muhammedarifp/user/api/handlers/user"
 	"github.com/muhammedarifp/user/api/middleware"
-	//_ "github.com/muhammedarifp/user/cmd/docs"
+
+	_ "github.com/muhammedarifp/user/cmd/docs"
 )
 
 type ServerHTTP struct {
 	engine *mux.Router
 }
 
-// @Summary Create a new user
-// @Description Create a new user with the specified details
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param name formData string true "User's name"
-// @Param email formData string true "User's email"
-// @Success 201 {object} UserResponse
-// @Failure 400 {object} ErrorResponse
-// @Router /api/users/create [post]
 func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhandlers.AdminHandler) *ServerHTTP {
 	// Create a new mux router.
 	engine := mux.NewRouter()
@@ -33,11 +24,15 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 	engine.Use(middleware.LoggingMiddleware)
 
 	// Serve the Swagger UI documentation.
-	// engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
-	// engine.Handle("/api/users/swagger.json", http.FileServer(http.Dir("docs")))
+	//engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
+	//engine.Handle("/api/users/swagger.json", http.FileServer(http.Dir("docs")))
+	// engine.HandleFunc("/api/users/swagger/", httpSwagger.Handler(
+	// 	httpSwagger.URL("github.com/muhammedarifp/user/cmd/docs"),
+	// ))
+
 	userRouter := engine.PathPrefix("/api/v1/users").Subrouter()
 	userAuthRouter := engine.PathPrefix("/api/v1/users").Subrouter()
-	adminRouter := engine.PathPrefix("/api/v1/admins").Subrouter()
+	adminRouter := engine.PathPrefix("/api/v1/users/admins").Subrouter()
 
 	// User endpoints
 	userRouter.HandleFunc("/signup", userHandler.Signup).Methods("POST")
@@ -47,7 +42,8 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 
 	// Admin endpoints
 	adminRouter.HandleFunc("/login", adminHandler.Login).Methods("POST")
-	adminRouter.HandleFunc("/users/{userid}/ban", adminHandler.BanUser).Methods("POST")
+	adminRouter.HandleFunc("/{userid}/ban", adminHandler.BanUser).Methods("POST")
+	adminRouter.HandleFunc("/{page}/getallusers", adminHandler.GetAllUsers).Methods("GET")
 
 	// User authentication routes
 	userAuthRouter.Use(middleware.AuthMiddleware)

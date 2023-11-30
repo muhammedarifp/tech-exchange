@@ -13,7 +13,7 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	services "github.com/muhammedarifp/user/usecases/interfaces"
-	_ "github.com/swaggo/http-swagger"
+	_ "github.com/swaggo/http-swagger/v2"
 )
 
 type UserHandler struct {
@@ -26,15 +26,11 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	}
 }
 
-// @Summary User Signup
-// @Description Register a new user
-// @ID user-signup
-// @Accept  json
-// @Produce  json
-// @Param req body UserSignupReq true "User signup request"
-// @Success 201 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Router /user/signup [post]
+// Getuser godoc
+// @Summary Ping the server
+// @Description Create new user
+// @ID create user
+// @Accept json
 func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
