@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/muhammedarifp/tech-exchange/notification/api/handlers"
+	_ "github.com/muhammedarifp/tech-exchange/notification/cmd/docs"
 	"github.com/muhammedarifp/tech-exchange/notification/config"
-	_ "github.com/muhammedarifp/tech-exchange/notification/docs"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )

@@ -1,3 +1,19 @@
+definitions:
+  domain.Notifications:
+    properties:
+      body:
+        type: string
+      createAt:
+        type: string
+      id:
+        type: integer
+      is_importent:
+        type: boolean
+      title:
+        type: string
+      userID:
+        type: integer
+    type: object
 info:
   contact: {}
   description: The Notification Service API allows you to manage and retrieve notifications.
@@ -5,5 +21,39 @@ info:
     users.
   title: Nofifications
   version: "1.0"
-paths: {}
+paths:
+  /notifications:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of notifications.
+      parameters:
+      - description: Page number for pagination (default is 1)
+        in: query
+        name: page
+        type: integer
+      - description: Number of items to return per page (default is 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Sort field for results
+        in: query
+        name: sortBy
+        type: string
+      - description: Sort order for results (asc or desc)
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Notifications'
+            type: array
+      summary: Get a list of notifications
+      tags:
+      - notifications
 swagger: "2.0"
