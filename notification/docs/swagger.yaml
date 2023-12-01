@@ -1,0 +1,35 @@
+definitions:
+  domain.Notifications:
+    properties:
+      body:
+        type: string
+      createAt:
+        type: string
+      id:
+        type: integer
+      is_importent:
+        type: boolean
+      title:
+        type: string
+      userID:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /notifications:
+    get:
+      description: Retrieves a list of notifications.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Notifications'
+            type: array
+      summary: Get a list of notifications
+      tags:
+      - notifications
+swagger: "2.0"

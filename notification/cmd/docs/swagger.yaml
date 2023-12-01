@@ -1,0 +1,9 @@
+info:
+  contact: {}
+  description: The Notification Service API allows you to manage and retrieve notifications.
+    It provides endpoints for creating, retrieving, and managing notifications for
+    users.
+  title: Nofifications
+  version: "1.0"
+paths: {}
+swagger: "2.0"
