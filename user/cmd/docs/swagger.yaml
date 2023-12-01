@@ -1,9 +1,0 @@
-basePath: /api/v1
-host: localhost:8000
-info:
-  contact: {}
-  description: This is a content sharing platform like medium or dev.to
-  title: Tech Exchange
-  version: "1.0"
-paths: {}
-swagger: "2.0"

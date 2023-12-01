@@ -70,7 +70,7 @@ func (d *userDatabase) UserLogin(user requests.UserLoginReq) (response.UserValue
 }
 
 func (d *userDatabase) GetUserDetaUsingID(userid string) (response.UserValue, error) {
-	qury := `SELECT id,username,created_at,email,is_verified FROM users WHERE id = $1`
+	qury := `SELECT * FROM users WHERE id = $1`
 	userData := response.UserValue{}
 	err := d.DB.Raw(qury, userid).Scan(&userData).Error
 	if err != nil {
@@ -95,10 +95,11 @@ func (d *userDatabase) CreateNewUser(user cache.UserTemp) (response.UserValue, e
 	WITH inserted_user AS (
 		INSERT INTO users (username, email, password, is_verified)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, created_at, is_verified, is_banned, username, email, is_premium
+		RETURNING *
 	)
 	INSERT INTO profiles (user_id, name)
 	VALUES ((SELECT id FROM inserted_user), (SELECT username FROM inserted_user))
+	RETURNING (SELECT id FROM inserted_user),(SELECT username FROM inserted_user),(SELECT email FROM inserted_user),(SELECT id FROM inserted_user),(SELECT is_verified FROM inserted_user), (SELECT is_premium FROM inserted_user),(SELECT is_banned FROM inserted_user),(SELECT is_active FROM inserted_user),(SELECT created_at FROM inserted_user)
 	`
 	var userVal response.UserValue
 	if err := d.DB.Raw(newQury, user.Username, user.Email, user.Password, true).Scan(&userVal).Error; err != nil {

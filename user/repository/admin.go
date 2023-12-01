@@ -46,3 +46,15 @@ func (d *adminDatabase) BanUser(userid string) (response.UserValue, error) {
 
 	return userVal, nil
 }
+
+func (d *adminDatabase) GetallUsers(page int) ([]response.UserValue, error) {
+	limit := 10
+	offset := (page - 1) * limit
+	qury := `SELECT * FROM users OFFSET $1 LIMIT $2`
+	var users []response.UserValue
+	if err := d.DB.Raw(qury, offset, limit).Scan(&users).Error; err != nil {
+		return []response.UserValue{}, err
+	}
+
+	return users, nil
+}

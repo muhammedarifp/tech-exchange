@@ -120,3 +120,12 @@ func (u *userUseCase) DeleteUserAccount(userid string) (response.UserValue, erro
 
 	return userVal, nil
 }
+
+func (u *userUseCase) FetchUserAccount(userid string) (response.UserValue, error) {
+	val, err := u.userRepo.GetUserDetaUsingID(userid)
+	if err != nil {
+		return response.UserValue{}, err
+	}
+
+	return val, nil
+}

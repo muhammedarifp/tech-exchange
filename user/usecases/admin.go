@@ -9,8 +9,6 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
 	service "github.com/muhammedarifp/user/usecases/interfaces"
-
-	_ "github.com/muhammedarifp/user/cmd/docs"
 )
 
 type adminUsecase struct {
@@ -56,4 +54,13 @@ func (u *adminUsecase) BanUser(userid string) (response.UserValue, error) {
 		}
 	}()
 	return userval, nil
+}
+
+func (u *adminUsecase) GetallUsers(page int) ([]response.UserValue, error) {
+	users, err := u.AdminRepo.GetallUsers(page)
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
 }

@@ -6,18 +6,31 @@ import (
 	"github.com/muhammedarifp/user/config"
 	"github.com/muhammedarifp/user/di"
 
-	_ "github.com/muhammedarifp/user/cmd/docs"
+	_ "github.com/muhammedarifp/user/docs"
 )
 
-// @title Tech Exchange
-// @version 1.0
-// @description This is a content sharing platform like medium or dev.to
-// @host localhost:8000
-// @BasePath /api/v1
+//	@title			Swagger Example API
+//	@version		1.0
+//	@description	This is a sample server celler server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.basic	BasicAuth
+
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	cfg := config.LoadConfig()
 	server, err := di.InitializeAPI(cfg)
-
 	//cronejobs.InitCronJobs()
 
 	if err != nil {

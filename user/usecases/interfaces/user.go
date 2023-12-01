@@ -24,4 +24,5 @@ type UserUseCase interface {
 	// user account
 	UpdateUserEmail(account response.UserValue, userid string) (response.UserValue, error) // put
 	DeleteUserAccount(userid string) (response.UserValue, error)                           // delete
+	FetchUserAccount(userid string) (response.UserValue, error)                            // get
 }

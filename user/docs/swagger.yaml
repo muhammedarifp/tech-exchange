@@ -1,0 +1,212 @@
+definitions:
+  requests.UserLoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  requests.UserPofileUpdate:
+    properties:
+      bio:
+        type: string
+      city:
+        type: string
+      github:
+        type: string
+      linkedin:
+        type: string
+      name:
+        type: string
+    type: object
+  requests.UserSignupReq:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error: {}
+      message:
+        type: string
+      statuscode:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: The Notification Service API allows you to manage and retrieve notifications.
+    It provides endpoints for creating, retrieving, and managing notifications for
+    users.
+  title: Nofifications
+  version: "1.0"
+paths:
+  /api/v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login for existing user
+      parameters:
+      - description: User information for login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UserLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login user
+      tags:
+      - Authentication
+  /api/v1/users/otp/send:
+    post:
+      consumes:
+      - application/json
+      description: Login for existing user
+      parameters:
+      - description: Test
+        in: query
+        name: unique
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Request otp
+      tags:
+      - Authentication
+  /api/v1/users/otp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Validate user enter otp
+      parameters:
+      - description: Your unique signup code
+        in: query
+        name: unique
+        required: true
+        type: string
+      - description: Your uniqu otp message
+        in: query
+        name: otp
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Verify otp
+      tags:
+      - Authentication
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user profile details using a unique signup code and OTP.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWTHeader: []
+      summary: View User Profile
+      tags:
+      - Profile
+  /api/v1/users/signup:
+    post:
+      consumes:
+      - application/json
+      description: Signup new user
+      parameters:
+      - description: User information for signup
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UserSignupReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Signup user
+      tags:
+      - Authentication
+  /api/v1/users/update-profile:
+    put:
+      consumes:
+      - application/json
+      description: Retrieve user profile details using a unique signup code and OTP.
+      parameters:
+      - description: Unique signup code for user identification
+        in: body
+        name: unique
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UserPofileUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - JWTHeader: []
+      summary: Update user profile
+      tags:
+      - Profile
+swagger: "2.0"

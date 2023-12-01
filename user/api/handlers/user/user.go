@@ -8,12 +8,12 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	_ "github.com/muhammedarifp/user/cmd/docs"
 	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
 	"github.com/muhammedarifp/user/commonhelp/requests"
 	"github.com/muhammedarifp/user/commonhelp/response"
+	_ "github.com/muhammedarifp/user/docs"
 	services "github.com/muhammedarifp/user/usecases/interfaces"
-	_ "github.com/swaggo/http-swagger"
+	_ "github.com/swaggo/http-swagger/v2"
 )
 
 type UserHandler struct {
@@ -26,16 +26,17 @@ func NewUserHandler(usecase services.UserUseCase) *UserHandler {
 	}
 }
 
-// @Summary User Signup
-// @Description Register a new user
-// @ID user-signup
-// @Accept  json
-// @Produce  json
-// @Param req body UserSignupReq true "User signup request"
-// @Success 201 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Router /user/signup [post]
-func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) {
+// @Summary Signup user
+// @Description Signup new user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body requests.UserSignupReq true "User information for signup"
+// @Success 200 {object} response.Response "User created success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/signup [post]
+// @BasePath /api/v1/users
+func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -114,7 +115,17 @@ func (h *UserHandler) UserSignupHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *UserHandler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
+// @Summary Login user
+// @Description Login for existing user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body requests.UserLoginReq true "User information for login"
+// @Success 200 {object} response.Response "User created success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/login [post]
+// @BasePath /api/v1/users
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Read the request body.
 	body, bodyErr := io.ReadAll(r.Body)
 	if bodyErr != nil {
