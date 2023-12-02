@@ -8,14 +8,19 @@ import (
 	adminhandlers "github.com/muhammedarifp/user/api/handlers/admin"
 	userhandlers "github.com/muhammedarifp/user/api/handlers/user"
 	"github.com/muhammedarifp/user/api/middleware"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 
-	_ "github.com/muhammedarifp/user/cmd/docs"
+	_ "github.com/muhammedarifp/user/docs"
 )
 
 type ServerHTTP struct {
 	engine *mux.Router
 }
 
+// Package docs provides documentation for your API.
+// @title Nofifications
+// @description The Notification Service API allows you to manage and retrieve notifications. It provides endpoints for creating, retrieving, and managing notifications for users.
+// @version 1.0
 func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhandlers.AdminHandler) *ServerHTTP {
 	// Create a new mux router.
 	engine := mux.NewRouter()
@@ -24,11 +29,7 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 	engine.Use(middleware.LoggingMiddleware)
 
 	// Serve the Swagger UI documentation.
-	//engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
-	//engine.Handle("/api/users/swagger.json", http.FileServer(http.Dir("docs")))
-	// engine.HandleFunc("/api/users/swagger/", httpSwagger.Handler(
-	// 	httpSwagger.URL("github.com/muhammedarifp/user/cmd/docs"),
-	// ))
+	engine.PathPrefix("/api/users/swagger/").Handler(httpSwagger.WrapHandler)
 
 	userRouter := engine.PathPrefix("/api/v1/users").Subrouter()
 	userAuthRouter := engine.PathPrefix("/api/v1/users").Subrouter()

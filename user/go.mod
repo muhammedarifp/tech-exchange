@@ -13,7 +13,6 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/robfig/cron v1.2.0
 	github.com/spf13/viper v1.17.0
-	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	github.com/swaggo/swag v1.16.2
 	golang.org/x/crypto v0.16.0
@@ -54,7 +53,6 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/swaggo/files v1.0.1 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect

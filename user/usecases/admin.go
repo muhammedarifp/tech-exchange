@@ -9,8 +9,6 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 	interfaces "github.com/muhammedarifp/user/repository/interface"
 	service "github.com/muhammedarifp/user/usecases/interfaces"
-
-	_ "github.com/muhammedarifp/user/cmd/docs"
 )
 
 type adminUsecase struct {

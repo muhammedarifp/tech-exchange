@@ -6,7 +6,7 @@ import (
 	"github.com/muhammedarifp/user/config"
 	"github.com/muhammedarifp/user/di"
 
-	_ "github.com/muhammedarifp/user/cmd/docs"
+	_ "github.com/muhammedarifp/user/docs"
 )
 
 //	@title			Swagger Example API

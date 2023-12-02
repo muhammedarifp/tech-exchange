@@ -8,6 +8,16 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 )
 
+// @Summary Request otp
+// @Description Login for existing user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param unique query string true "Test"
+// @Success 200 {object} response.Response "User created success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/otp/send [post]
+// @BasePath /api/v1/users
 func (u *UserHandler) RequestOtp(w http.ResponseWriter, r *http.Request) {
 	qury := r.URL.Query()
 	unique := qury["unique"]
@@ -50,6 +60,17 @@ func (u *UserHandler) RequestOtp(w http.ResponseWriter, r *http.Request) {
 	w.Write(json_resp)
 }
 
+// @Summary Verify otp
+// @Description Validate user enter otp
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param unique query string true "Your unique signup code"
+// @Param otp query string true "Your uniqu otp message"
+// @Success 200 {object} response.Response "User created success"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/otp/verify [post]
+// @BasePath /api/v1/users
 func (u *UserHandler) VerifyOtp(w http.ResponseWriter, r *http.Request) {
 	// Get the token from the request header.
 	qurys := r.URL.Query()

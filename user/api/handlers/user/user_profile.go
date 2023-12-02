@@ -12,6 +12,22 @@ import (
 	"github.com/muhammedarifp/user/commonhelp/response"
 )
 
+// @SecurityDefinition JWTHeader
+// @Type apiKey
+// @In header
+// @Name Authorization
+type JWTHeader struct{}
+
+// @Summary View User Profile
+// @Description Retrieve user profile details using a unique signup code and OTP.
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response "User profile retrieved successfully"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/profile [get]
+// @Security JWTHeader
+// @BasePath /api/v1/users
 func (u *UserHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Token")
 	w.Header().Set("Content-Type", "application/json")
@@ -85,7 +101,17 @@ func (u *UserHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 	w.Write(marshelResp)
 }
 
-// Update user profile
+// @Summary Update user profile
+// @Description Retrieve user profile details using a unique signup code and OTP.
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Param unique body requests.UserPofileUpdate true "Unique signup code for user identification" example="abcdef123"
+// @Success 200 {object} response.Response "User profile retrieved successfully"
+// @Failure 400 {object} response.Response "Bad Request"
+// @Router /api/v1/users/update-profile [put]
+// @Security JWTHeader
+// @BasePath /api/v1/users
 func (u *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// Fetch Auth Token
 	token := r.Header.Get("Token")
@@ -166,6 +192,7 @@ func (u *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 // Upload new profile image
+
 func (u *UserHandler) UploadProfileImage(w http.ResponseWriter, r *http.Request) {
 	userid, _ := helperfuncs.GetUserIdFromJwt(r.Header.Get("Token"))
 	maxsize := 5 * 1024 * 1024
