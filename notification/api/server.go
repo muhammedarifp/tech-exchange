@@ -23,6 +23,7 @@ func NewServeHTTP(notificationHandler *handlers.NotificationsHandler) *ServerHTT
 	app.Use(gin.Logger())
 
 	app.GET("/notifications/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	go notificationHandler.StoreNotificationOnDatabase()
 
 	// Create a coustom route group
 	notification := app.Group("/api/v1/users/notification")
@@ -39,3 +40,10 @@ func (s *ServerHTTP) Start() {
 	cfg := config.GetConfig()
 	s.engine.Run(cfg.APP_PORT)
 }
+
+// func (s *ServerHTTP) RabbitmqStart() {
+// 	rabbitmq.NewRabbitmqConnection()
+// 	go func() {
+
+// 	}()
+// }

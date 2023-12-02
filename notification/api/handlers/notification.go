@@ -31,7 +31,6 @@ func (u *NotificationsHandler) GetallNotifications(ctx *gin.Context) {
 	ctx.String(200, "Iam Okkkkkkkkkkkkkkk!")
 }
 
-// Store notification on database
-func (u *NotificationsHandler) StoreNotificationsOnDB() {
-
+func (u *NotificationsHandler) StoreNotificationOnDatabase() {
+	u.usecase.StoreNotificationsOnDB()
 }

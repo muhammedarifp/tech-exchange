@@ -1,5 +1,7 @@
 package interfaces
 
+import commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHelp"
+
 type NotificationRepo interface {
-	// GetallNotifications(userid string)
+	StoreNotificationsOnDB(notification commonhelp.NotificationResp)
 }
