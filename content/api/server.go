@@ -23,6 +23,7 @@ func NewServeHTTP(userHandler *handlers.ContentUserHandler) *ServerHTTP {
 	// @Swagger
 	userAuth.POST("/create-post", userHandler.CreateNewPost)
 	userAuth.POST("/add-comment", userHandler.CreateComment)
+	userAuth.PATCH("/like", userHandler.LikePost)
 
 	return &ServerHTTP{echo: e}
 }

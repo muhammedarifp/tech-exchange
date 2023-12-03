@@ -9,7 +9,7 @@ type UserValue struct {
 	CreatedAt   time.Time `json:"created_at"`
 	Username    string    `json:"username"`
 	Email       string    `json:"email"`
-	Password    string    `json:"-"`
+	Password    string    `json:"password"`
 	Is_verified bool      `json:"is_verified"`
 	Is_premium  bool      `json:"is_premium"`
 	Is_banned   bool      `json:"is_banned"`

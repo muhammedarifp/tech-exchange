@@ -98,3 +98,29 @@ func (d *ContentUserDatabase) CreateComment(ctx context.Context, post_id, userid
 
 	return emptyContentResp, nil
 }
+
+func (d *ContentUserDatabase) LikePost(ctx context.Context, postid string) (domain.Contents, error) {
+	var emptyContentResp domain.Contents
+	cfg := config.GetConfig()
+	select {
+	case <-ctx.Done():
+		return emptyContentResp, errors.New("time limit reached")
+	default:
+		time.Sleep(time.Second)
+	}
+
+	objid, objidErr := primitive.ObjectIDFromHex(postid)
+	if objidErr != nil {
+		return emptyContentResp, errors.New("Postid is invalid")
+	}
+	filter := bson.M{"_id": objid}
+	update := bson.M{"$inc": bson.M{"like": 1}}
+	res, resErr := d.DB.Database(cfg.DB_NAME).Collection("contents").UpdateOne(ctx, filter, update, nil)
+	if resErr != nil || res.MatchedCount <= 0 {
+		return emptyContentResp, resErr
+	}
+
+	fmt.Println(res.MatchedCount)
+
+	return emptyContentResp, nil
+}

@@ -25,7 +25,7 @@ func AuthMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
-		req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/users/account", nil)
+		req, _ := http.NewRequest("GET", "http://192.168.193.17:8080/api/v1/users/account", nil)
 		req.Header.Set("Token", token)
 		client := http.Client{}
 		user, user_err := client.Do(req)

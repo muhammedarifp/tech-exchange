@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/aidarkhanov/nanoid"
@@ -36,7 +35,6 @@ func (u *userUseCase) UserSignup(user requests.UserSignupReq) (cache.UserTemp, e
 		return cache.UserTemp{}, searchErr
 	}
 
-	fmt.Println(count)
 	// If the email count is greater than 1, it means the email already exists
 	if count >= 1 {
 		return cache.UserTemp{}, errors.New("this email already exists")

@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"log"
 	"sync"
 
 	commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHelp"
+	"github.com/muhammedarifp/tech-exchange/notification/domain"
 	interfaces "github.com/muhammedarifp/tech-exchange/notification/repository/interface"
 	"gorm.io/gorm"
 )
@@ -21,15 +21,16 @@ func NewNotificationRepo(db *gorm.DB) interfaces.NotificationRepo {
 	return &notificationsDB{DB: db}
 }
 
-func (d *notificationsDB) StoreNotificationsOnDB(notification commonhelp.NotificationResp) {
-	mu.Lock()
-	defer mu.Unlock()
-	query := ``
-	if err := d.DB.Raw(query).Error; err != nil {
-		log.Fatalf("Errororoo")
+func (d *notificationsDB) StoreNotificationsOnDB(notification commonhelp.NotificationResp) bool {
+	query := `INSERT INTO notifications(user_id,title,body,is_importent) 
+			VALUES ($1,$2,$3,$4)
+			RETURNING *`
+
+	var n domain.Notifications
+	err := d.DB.Raw(query, notification.UserID, notification.Title, notification.Body, notification.IsImportent).Scan(&n).Error
+	if err != nil {
+		return false
 	}
 
-	if notification.IsImportent {
-		// send mail
-	}
+	return true
 }

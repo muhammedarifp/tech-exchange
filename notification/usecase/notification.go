@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHelp"
 	"github.com/muhammedarifp/tech-exchange/notification/rabbitmq"
@@ -54,13 +53,14 @@ func (u *notificationUsecase) StoreNotificationsOnDB() {
 			if err != nil {
 				log.Fatalf("unmarshel error : %v", err)
 			}
-			u.repo.StoreNotificationsOnDB(notification)
+
+			status := u.repo.StoreNotificationsOnDB(notification)
+			if status {
+				fmt.Println("okk")
+			} else {
+				fmt.Println("Not okk")
+			}
 		}
 	}()
-
-	for {
-		fmt.Println("Now iam working")
-		time.Sleep(time.Second * 1)
-	}
 
 }

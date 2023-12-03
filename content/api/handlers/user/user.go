@@ -85,3 +85,17 @@ func (u *ContentUserHandler) CreateComment(c echo.Context) error {
 
 	return c.String(200, fmt.Sprintf("postid is %s", postid))
 }
+
+func (u *ContentUserHandler) LikePost(c echo.Context) error {
+	postid := c.QueryParam("post_id")
+	if postid == "" {
+		return c.String(400, "Your postid is empty")
+	}
+
+	_, err := u.usecase.LikePost(postid)
+	if err != nil {
+		return c.String(400, err.Error())
+	}
+
+	return c.String(200, "Liked")
+}
