@@ -3,7 +3,10 @@ package usecases
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/muhammedarifp/content/commonHelp/requests"
@@ -23,7 +26,8 @@ func NewContentUserUsecase(repo interfaces.ContentUserRepository) services.Conte
 }
 
 func (c *ContentUserUsecase) CreatePost(userid string, post requests.CreateNewPostRequest) (domain.Contents, error) {
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	defer cancel()
 	val, err := c.userRepo.CreateNewPost(ctx, userid, post)
 	if err != nil {
 		return val, err
@@ -33,7 +37,8 @@ func (c *ContentUserUsecase) CreatePost(userid string, post requests.CreateNewPo
 }
 
 func (c *ContentUserUsecase) CreateComment(userid, postid, text string) (domain.Contents, error) {
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	defer cancel()
 	content, err := c.userRepo.CreateComment(ctx, postid, userid, text)
 	if err != nil {
 		return content, err
@@ -42,42 +47,98 @@ func (c *ContentUserUsecase) CreateComment(userid, postid, text string) (domain.
 	return content, nil
 }
 
-func (c *ContentUserUsecase) LikePost(postid string) (domain.Contents, error) {
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
-	content, err := c.userRepo.LikePost(ctx, postid)
+func (c *ContentUserUsecase) LikePost(postid, user_id string) (domain.Contents, error) {
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+	defer cancel()
+	content, respoErr := c.userRepo.LikePost(ctx, postid, user_id)
+	var emptyContent domain.Contents
 
-	// Send notification
-	go func() {
-		conn, _ := rabbitmq.NewRabbitmqConnection()
+	if respoErr != nil || content.UserID == 0 {
+		return emptyContent, errors.New("Internal server error try again later")
+	}
 
-		ch, cherr := conn.Channel()
-		if cherr != nil {
-			log.Fatalf("channel creation error : %v", cherr)
-		}
+	useridUInt, strconvErr := strconv.Atoi(user_id)
+	if strconvErr != nil {
+		return emptyContent, errors.New("userid is not convertable")
+	}
 
-		queue, queueErr := ch.QueueDeclare("notification", false, false, false, false, nil)
-		if queueErr != nil {
-			log.Fatalf("channel creation error : %v", queueErr)
-		}
+	if content.UserID != uint(useridUInt) {
+		// Send notification
+		go func() {
+			conn, connErr := rabbitmq.NewRabbitmqConnection()
+			if connErr != nil {
+				log.Printf("rabbitmq connection error: %v", connErr)
+				return
+			}
 
-		notification, marshelErr := json.Marshal(requests.NotificationReq{
-			UserID:      uint(10),
-			Title:       "New Like ... ",
-			Body:        "New Like on your post ...",
-			IsImportent: true,
-		})
+			ch, cherr := conn.Channel()
+			if cherr != nil {
+				log.Printf("rabbitmq connection error: %v", ch)
+				return
+			}
 
-		if marshelErr != nil {
-			log.Fatalf("marshel error : %v", marshelErr)
-		}
+			queue, queueErr := ch.QueueDeclare("notification", false, false, false, false, nil)
+			if queueErr != nil {
+				log.Printf("queue creation error: %v", queueErr)
+				return
+			}
 
-		if publishErr := ch.PublishWithContext(context.Background(), "", queue.Name, false, false, amqp091.Publishing{
-			ContentType: "application/json",
-			Body:        notification,
-		}); publishErr != nil {
-			log.Fatalf("publish error : %v", publishErr)
-		}
-	}()
+			notification, marshelErr := json.Marshal(requests.NotificationReq{
+				UserID:      content.UserID,
+				LikedUserID: uint(useridUInt),
+				Title:       "New Like Notification",
+				Body:        "Your post received a new like!",
+				IsImportent: true,
+			})
 
-	return content, err
+			if marshelErr != nil {
+				log.Printf("marshal error: %v", marshelErr)
+				return
+			}
+
+			if publishErr := ch.PublishWithContext(context.Background(), "", queue.Name, false, false, amqp091.Publishing{
+				ContentType: "application/json",
+				Body:        notification,
+			}); publishErr != nil {
+				log.Printf("publish error: %v", publishErr)
+				return
+			}
+		}()
+	}
+
+	return content, nil
+}
+
+func (c *ContentUserUsecase) UpdatePost(post requests.UpdatePostRequest, userid string) (domain.Contents, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	content, repoErr := c.userRepo.UpdatePost(ctx, post, userid)
+	if repoErr != nil {
+		return content, repoErr
+	}
+
+	return content, repoErr
+}
+
+func (c *ContentUserUsecase) RemovePost(postid, userid string) (domain.Contents, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	content, repoErr := c.userRepo.RemovePost(ctx, postid, userid)
+	if repoErr != nil {
+		return content, repoErr
+	}
+
+	return content, repoErr
+}
+
+func (c *ContentUserUsecase) GetUserPosts(userid string, page int) ([]domain.Contents, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	contents, repoErr := c.userRepo.GetUserPosts(ctx, userid, page)
+	if repoErr != nil {
+		fmt.Println("repo error found")
+		return contents, repoErr
+	}
+
+	return contents, repoErr
 }

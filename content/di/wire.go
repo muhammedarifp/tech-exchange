@@ -3,7 +3,8 @@ package di
 // import (
 // 	"github.com/google/wire"
 // 	"github.com/muhammedarifp/content/api"
-// 	handlers "github.com/muhammedarifp/content/api/handlers/user"
+// 	adminhandlers "github.com/muhammedarifp/content/api/handlers/admin"
+// 	userhandlers "github.com/muhammedarifp/content/api/handlers/user"
 // 	"github.com/muhammedarifp/content/config"
 // 	"github.com/muhammedarifp/content/db"
 // 	"github.com/muhammedarifp/content/repository"
@@ -17,12 +18,15 @@ package di
 
 // 		// repositry
 // 		repository.NewContentUserRepo,
+// 		repository.NewAdminContentRepository,
 
 // 		// usecase
 // 		usecases.NewContentUserUsecase,
+// 		usecases.NewAdminContentUsecase,
 
 // 		// handlers
-// 		handlers.NewContentUserHandler,
+// 		userhandlers.NewContentUserHandler,
+// 		adminhandlers.NewAdminContentHandler,
 
 // 		// server
 // 		api.NewServeHTTP,

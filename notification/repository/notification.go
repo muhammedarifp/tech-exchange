@@ -22,12 +22,12 @@ func NewNotificationRepo(db *gorm.DB) interfaces.NotificationRepo {
 }
 
 func (d *notificationsDB) StoreNotificationsOnDB(notification commonhelp.NotificationResp) bool {
-	query := `INSERT INTO notifications(user_id,title,body,is_importent) 
-			VALUES ($1,$2,$3,$4)
+	query := `INSERT INTO notifications(user_id,title,body,is_importent,liked_user) 
+			VALUES ($1,$2,$3,$4,$5)
 			RETURNING *`
 
 	var n domain.Notifications
-	err := d.DB.Raw(query, notification.UserID, notification.Title, notification.Body, notification.IsImportent).Scan(&n).Error
+	err := d.DB.Raw(query, notification.UserID, notification.Title, notification.Body, notification.IsImportent, notification.LikedUserID).Scan(&n).Error
 	if err != nil {
 		return false
 	}

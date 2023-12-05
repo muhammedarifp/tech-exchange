@@ -7,18 +7,19 @@ import (
 )
 
 type Contents struct {
-	ID              primitive.ObjectID `bson:"_id,omitempty"`
-	CreateAt        time.Time          `bson:"create_at"`
-	LastUpdate      time.Time          `bson:"last_update"`
-	UserID          uint               `bson:"user_id"`
-	ThumbnailImg    string             `bson:"thumbnail_img"`
-	Title           string             `bson:"title"`
-	Body            string             `bson:"body"`
-	Like            uint               `bson:"like"`
-	IsShowReactions bool               `bson:"is_show_reactions"`
-	IsPremium       bool               `bson:"is_premium"`
-	Comments        []Comment          `bson:"comments"`
-	Reactions       []Reaction         `bson:"reactions"`
+	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	CreateAt        time.Time          `bson:"create_at" json:"create_at"`
+	LastUpdate      time.Time          `bson:"last_update" json:"last_update"`
+	UserID          uint               `bson:"user_id" json:"user_id"`
+	ThumbnailImg    string             `bson:"thumbnail_img" json:"thumbnail_img"`
+	Title           string             `bson:"title" json:"title"`
+	Body            string             `bson:"body" json:"body"`
+	Like            uint               `bson:"like" json:"like"`
+	IsShowReactions bool               `bson:"is_show_reactions"  json:"is_show_reactions"`
+	IsPremium       bool               `bson:"is_premium" json:"is_premium"`
+	Comments        []Comment          `bson:"comments" json:"comments"`
+	Reactions       []Reaction         `json:"reactions" bson:"reactions"`
+	IsActive        bool               `json:"is_active" bson:"is_active"`
 }
 
 type LabelMapping struct {

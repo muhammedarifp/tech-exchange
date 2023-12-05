@@ -53,7 +53,6 @@ func (u *notificationUsecase) StoreNotificationsOnDB() {
 			if err != nil {
 				log.Fatalf("unmarshel error : %v", err)
 			}
-
 			status := u.repo.StoreNotificationsOnDB(notification)
 			if status {
 				fmt.Println("okk")

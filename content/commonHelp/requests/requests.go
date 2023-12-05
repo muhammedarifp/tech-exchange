@@ -6,3 +6,11 @@ type CreateNewPostRequest struct {
 	Is_showReactions bool   `json:"is_show_reactions"`
 	Is_premium       bool   `json:"is_premium"`
 }
+
+type UpdatePostRequest struct {
+	Postid           string `json:"postid"`
+	Title            string `json:"title"`
+	Body             string `json:"body"`
+	Is_showReactions bool   `json:"is_show_reactions"`
+	Is_premium       bool   `json:"is_premium"`
+}

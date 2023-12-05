@@ -8,6 +8,7 @@ package di
 
 import (
 	"github.com/muhammedarifp/content/api"
+	handlers2 "github.com/muhammedarifp/content/api/handlers/admin"
 	"github.com/muhammedarifp/content/api/handlers/user"
 	"github.com/muhammedarifp/content/config"
 	"github.com/muhammedarifp/content/db"
@@ -25,6 +26,9 @@ func InitWire(cfg config.Config) (*api.ServerHTTP, error) {
 	contentUserRepository := repository.NewContentUserRepo(client)
 	contentUserUsecase := usecases.NewContentUserUsecase(contentUserRepository)
 	contentUserHandler := handlers.NewContentUserHandler(contentUserUsecase)
-	serverHTTP := api.NewServeHTTP(contentUserHandler)
+	adminContentRepo := repository.NewAdminContentRepository(client)
+	adminContentUseCase := usecases.NewAdminContentUsecase(adminContentRepo)
+	adminContentHandler := handlers2.NewAdminContentHandler(adminContentUseCase)
+	serverHTTP := api.NewServeHTTP(contentUserHandler, adminContentHandler)
 	return serverHTTP, nil
 }

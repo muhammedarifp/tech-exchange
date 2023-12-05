@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ContentUserDatabase struct {
@@ -28,13 +29,11 @@ func (d *ContentUserDatabase) CreateNewPost(ctx context.Context, userid string, 
 	cfg := config.GetConfig()
 	var emptyContentResp domain.Contents
 
-	defer d.DB.Disconnect(ctx)
-
 	select {
 	case <-ctx.Done():
 		return emptyContentResp, errors.New("time limit reached")
 	default:
-		time.Sleep(time.Second)
+
 	}
 
 	_newPostId := primitive.NewObjectID()
@@ -53,13 +52,14 @@ func (d *ContentUserDatabase) CreateNewPost(ctx context.Context, userid string, 
 		IsPremium:       post.Is_premium,
 		Comments:        []domain.Comment{},
 		Reactions:       []domain.Reaction{},
+		IsActive:        true,
 	}
-	res, err := d.DB.Database(cfg.DB_NAME).Collection("contents").InsertOne(context.TODO(), newContent)
+	_, err := d.DB.Database(cfg.DB_NAME).Collection("contents").InsertOne(context.TODO(), newContent)
 	if err != nil {
 		return emptyContentResp, err
 	}
 
-	fmt.Println(res)
+	// fmt.Println(res)
 
 	return newContent, nil
 }
@@ -71,7 +71,7 @@ func (d *ContentUserDatabase) CreateComment(ctx context.Context, post_id, userid
 	case <-ctx.Done():
 		return emptyContentResp, errors.New("time limit reached")
 	default:
-		time.Sleep(time.Second)
+
 	}
 
 	object_id, obj_err := primitive.ObjectIDFromHex(post_id)
@@ -80,7 +80,6 @@ func (d *ContentUserDatabase) CreateComment(ctx context.Context, post_id, userid
 	}
 
 	filter := bson.M{"_id": object_id}
-	fmt.Println(filter)
 	update := bson.M{
 		"$push": bson.M{"comments": domain.Comment{
 			CreateAt: time.Now(),
@@ -89,38 +88,167 @@ func (d *ContentUserDatabase) CreateComment(ctx context.Context, post_id, userid
 		}},
 	}
 
-	updateRes, updateErr := d.DB.Database(cfg.DB_NAME).Collection("contents").UpdateOne(ctx, filter, update)
+	_, updateErr := d.DB.Database(cfg.DB_NAME).Collection("contents").UpdateOne(ctx, filter, update)
 	if updateErr != nil {
-		fmt.Println("-->", updateErr.Error())
 		return emptyContentResp, updateErr
 	}
-	fmt.Println(updateRes.MatchedCount)
 
 	return emptyContentResp, nil
 }
 
-func (d *ContentUserDatabase) LikePost(ctx context.Context, postid string) (domain.Contents, error) {
+func (d *ContentUserDatabase) LikePost(ctx context.Context, postid, userid string) (domain.Contents, error) {
 	var emptyContentResp domain.Contents
 	cfg := config.GetConfig()
+
+	// Set time limit
 	select {
 	case <-ctx.Done():
 		return emptyContentResp, errors.New("time limit reached")
 	default:
-		time.Sleep(time.Second)
+
 	}
 
+	// Parse postid
 	objid, objidErr := primitive.ObjectIDFromHex(postid)
 	if objidErr != nil {
-		return emptyContentResp, errors.New("Postid is invalid")
+		return emptyContentResp, errors.New("Invalid PostID")
 	}
+
+	// Update like count
 	filter := bson.M{"_id": objid}
-	update := bson.M{"$inc": bson.M{"like": 1}}
-	res, resErr := d.DB.Database(cfg.DB_NAME).Collection("contents").UpdateOne(ctx, filter, update, nil)
-	if resErr != nil || res.MatchedCount <= 0 {
-		return emptyContentResp, resErr
+	reaction := domain.Reaction{
+		CreateAt: time.Now(),
+		UserID:   userid,
+	}
+	update := bson.M{
+		"$inc":  bson.M{"like": 1},
+		"$push": bson.M{"reactions": reaction},
+	}
+	//res, resErr := d.DB.Database(cfg.DB_NAME).Collection("contents").UpdateOne(ctx, filter, update, nil)
+	opts := options.FindOneAndUpdate().SetUpsert(false).SetReturnDocument(options.After)
+	res := d.DB.Database(cfg.DB_NAME).Collection("contents").FindOneAndUpdate(ctx, filter, update, opts)
+
+	if res.Err() != nil {
+		return emptyContentResp, res.Err()
+	}
+	var a domain.Contents
+	res.Decode(&a)
+
+	fmt.Println(a)
+
+	return a, nil
+}
+
+func (d *ContentUserDatabase) UpdatePost(ctx context.Context, post requests.UpdatePostRequest, userID string) (domain.Contents, error) {
+	cfg := config.GetConfig()
+
+	select {
+	case <-ctx.Done():
+		return domain.Contents{}, errors.New("time limit reached")
+	default:
+
 	}
 
-	fmt.Println(res.MatchedCount)
+	// Parse ObjectID
+	objID, err := primitive.ObjectIDFromHex(post.Postid)
+	if err != nil {
+		return domain.Contents{}, fmt.Errorf("invalid ObjectID: %w", err)
+	}
 
-	return emptyContentResp, nil
+	// Define filter and update
+	filter := bson.M{"_id": objID, "user_id": userID}
+	update := bson.M{
+		"body":              post.Body,
+		"is_premium":        post.Is_premium,
+		"is_show_reactions": post.Is_showReactions,
+		"title":             post.Title,
+		"last_update":       time.Now(),
+	}
+
+	// Define options for FindOneAndUpdate
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	// Perform FindOneAndUpdate
+	res := d.DB.Database(cfg.DB_NAME).Collection("contents").FindOneAndUpdate(ctx, filter, bson.M{"$set": update}, options)
+
+	// Check for errors
+	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return domain.Contents{}, fmt.Errorf("post not found or not owned by the user")
+		}
+		return domain.Contents{}, fmt.Errorf("update failed: %w", res.Err())
+	}
+
+	// Decode the result into contentData
+	var contentData domain.Contents
+	if err := res.Decode(&contentData); err != nil {
+		return domain.Contents{}, fmt.Errorf("result decoding failed: %w", err)
+	}
+
+	return contentData, nil
+}
+
+func (d *ContentUserDatabase) RemovePost(ctx context.Context, postID, userID string) (domain.Contents, error) {
+	cfg := config.GetConfig()
+
+	// Parse ObjectID
+	objID, objIDErr := primitive.ObjectIDFromHex(postID)
+	if objIDErr != nil {
+		return domain.Contents{}, fmt.Errorf("invalid post ID: %w", objIDErr)
+	}
+
+	// Define filter and update
+	useridInt, strconvErr := strconv.Atoi(userID)
+	if strconvErr != nil {
+		return domain.Contents{}, fmt.Errorf("string convert error : %w", strconvErr)
+	}
+	filter := bson.M{"_id": objID, "user_id": useridInt}
+	update := bson.M{"is_active": false}
+
+	// Define options for FindOneAndUpdate
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	// Perform FindOneAndUpdate
+	res := d.DB.Database(cfg.DB_NAME).Collection("contents").FindOneAndUpdate(ctx, filter, bson.M{"$set": update}, options)
+
+	// Check for errors
+	if res.Err() != nil {
+		return domain.Contents{}, fmt.Errorf("update failed: %w", res.Err())
+	}
+
+	// Decode the result into content
+	var content domain.Contents
+	if err := res.Decode(&content); err != nil {
+		return domain.Contents{}, fmt.Errorf("result decoding failed: %w", err)
+	}
+
+	return content, nil
+}
+
+func (d *ContentUserDatabase) GetUserPosts(ctx context.Context, userid string, page int) ([]domain.Contents, error) {
+	cfg := config.GetConfig()
+	collection := d.DB.Database(cfg.DB_NAME).Collection(cfg.DB_NAME)
+
+	limit := 10
+	offset := (page - 1) * limit
+	options := options.Find().SetSkip(int64(offset)).SetLimit(int64(limit))
+	useridInt, strconvErr := strconv.Atoi(userid)
+	if strconvErr != nil {
+		return []domain.Contents{}, strconvErr
+	}
+	filter := bson.M{
+		"user_id":   useridInt,
+		"is_active": true,
+	}
+	cursor, findErr := collection.Find(ctx, filter, options)
+	if findErr != nil {
+		return []domain.Contents{}, findErr
+	}
+
+	var a []domain.Contents
+	if err := cursor.All(ctx, &a); err != nil {
+		return []domain.Contents{}, err
+	}
+
+	return a, nil
 }
