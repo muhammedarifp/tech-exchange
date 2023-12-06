@@ -307,3 +307,18 @@ func (u *ContentUserHandler) GetUserContents(c echo.Context) error {
 
 	return c.JSON(200, contents)
 }
+
+func (h *ContentUserHandler) GetallPosts(c echo.Context) error {
+	page := c.QueryParam("page")
+	pageInt, strconvErr := strconv.Atoi(page)
+	if strconvErr != nil {
+		return c.String(400, strconvErr.Error())
+	}
+
+	posts, usecasErr := h.usecase.GetallPosts(pageInt)
+	if usecasErr != nil {
+		return c.String(400, usecasErr.Error()+" : usecase")
+	}
+
+	return c.JSON(200, posts)
+}

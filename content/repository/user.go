@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -251,4 +252,28 @@ func (d *ContentUserDatabase) GetUserPosts(ctx context.Context, userid string, p
 	}
 
 	return a, nil
+}
+
+func (d *ContentUserDatabase) GetallPosts(ctx context.Context, page int) ([]domain.Contents, error) {
+	cfg := config.GetConfig()
+	collection := d.DB.Database(cfg.DB_NAME).Collection("contents")
+	limit := 10
+	offset := (page - 1) * limit
+	options := options.Find().SetSkip(int64(offset)).SetLimit(10)
+
+	//filter
+	filter := bson.M{"is_active": true}
+	cursor, findErr := collection.Find(ctx, filter, options)
+	if findErr != nil {
+		return []domain.Contents{}, fmt.Errorf("find error %w", findErr)
+	}
+
+	var s []domain.Contents
+	if err := cursor.All(ctx, &s); err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	fmt.Println(s)
+
+	return s, nil
 }

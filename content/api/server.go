@@ -28,8 +28,10 @@ func NewServeHTTP(userHandler *userhandlers.ContentUserHandler, adminHandler *ad
 	userAuth.PUT("/update", userHandler.UpdateContent)
 	userAuth.DELETE("/delete", userHandler.DeleteContent)
 	userAuth.GET("/getown", userHandler.GetUserContents)
+	userAuth.GET("/getall", userHandler.GetallPosts)
 
 	adminAuth.GET("/getall", adminHandler.GetallPosts)
+	adminAuth.DELETE("/delete", adminHandler.DeleteContent)
 
 	return &ServerHTTP{echo: e}
 }

@@ -14,4 +14,5 @@ type ContentUserRepository interface {
 	UpdatePost(ctx context.Context, post requests.UpdatePostRequest, userid string) (domain.Contents, error)
 	RemovePost(ctx context.Context, postid, userid string) (domain.Contents, error)
 	GetUserPosts(ctx context.Context, userid string, page int) ([]domain.Contents, error)
+	GetallPosts(ctx context.Context, page int) ([]domain.Contents, error)
 }

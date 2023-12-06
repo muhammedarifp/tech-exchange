@@ -34,3 +34,14 @@ func (u *AdminContentUsecase) GetallPosts(page int) ([]domain.Contents, error) {
 
 	return posts, nil
 }
+
+func (c *AdminContentUsecase) RemovePost(postid, userid string) (domain.Contents, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	content, repoErr := c.repo.RemovePost(ctx, postid, userid)
+	if repoErr != nil {
+		return content, repoErr
+	}
+
+	return content, repoErr
+}

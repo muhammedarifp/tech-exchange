@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/muhammedarifp/content/config"
 	"github.com/muhammedarifp/content/domain"
 	"github.com/muhammedarifp/content/repository/interfaces"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -43,4 +45,41 @@ func (d *AdminContentRepository) GetallPosts(ctx context.Context, page int) ([]d
 	fmt.Println(s)
 
 	return s, nil
+}
+
+func (d *AdminContentRepository) RemovePost(ctx context.Context, postID, userID string) (domain.Contents, error) {
+	cfg := config.GetConfig()
+
+	// Parse ObjectID
+	objID, objIDErr := primitive.ObjectIDFromHex(postID)
+	if objIDErr != nil {
+		return domain.Contents{}, fmt.Errorf("invalid post ID: %w", objIDErr)
+	}
+
+	// Define filter and update
+	useridInt, strconvErr := strconv.Atoi(userID)
+	if strconvErr != nil {
+		return domain.Contents{}, fmt.Errorf("string convert error : %w", strconvErr)
+	}
+	filter := bson.M{"_id": objID, "user_id": useridInt}
+	update := bson.M{"is_active": false}
+
+	// Define options for FindOneAndUpdate
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	// Perform FindOneAndUpdate
+	res := d.db.Database(cfg.DB_NAME).Collection("contents").FindOneAndUpdate(ctx, filter, bson.M{"$set": update}, options)
+
+	// Check for errors
+	if res.Err() != nil {
+		return domain.Contents{}, fmt.Errorf("update failed: %w", res.Err())
+	}
+
+	// Decode the result into content
+	var content domain.Contents
+	if err := res.Decode(&content); err != nil {
+		return domain.Contents{}, fmt.Errorf("result decoding failed: %w", err)
+	}
+
+	return content, nil
 }

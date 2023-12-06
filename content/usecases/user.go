@@ -142,3 +142,18 @@ func (c *ContentUserUsecase) GetUserPosts(userid string, page int) ([]domain.Con
 
 	return contents, repoErr
 }
+
+func (u *ContentUserUsecase) GetallPosts(page int) ([]domain.Contents, error) {
+	if page <= 0 {
+		return []domain.Contents{}, errors.New("Invalid page number")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	posts, repoErr := u.userRepo.GetallPosts(ctx, page)
+	if repoErr != nil {
+		return []domain.Contents{}, repoErr
+	}
+
+	return posts, nil
+}
