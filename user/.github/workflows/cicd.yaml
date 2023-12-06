@@ -1,0 +1,36 @@
+name: user
+run-name: ${{ github.actor }} is create a push request on master branch
+on: [push]
+jobs:
+  check-code:
+    name: Check code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup golang
+        uses: actions/setup-go/@v3
+        with:
+          go-version: latest
+
+      - name: Testing
+        uses: go test ./...
+  
+  build:
+    name: Deploy on docker hub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup docker build
+        uses: docker/setup-buildx-action@v2
+        with:
+          context: .
+          file: ./Dokerfile
+          push: true
+          tags: |
+            muhammedarif0100/user:latest
+            muhammedarif0100/user:${{github.sha}}
