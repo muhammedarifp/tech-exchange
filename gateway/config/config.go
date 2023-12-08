@@ -1,42 +1,37 @@
 package config
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	USER_SERVICE    string
-	CONTENT_SERVICE string
+	USER_SERVICE         string
+	CONTENT_SERVICE      string
+	NOTIFICATION_SERVICE string
+	PAYMENT_SERVICE      string
+	USER_COMMON          string
+	USER_ADMIN_COMMON    string
+	CONTENT_COMMON       string
+	CONTENT_ADMIN_COMMON string
+	NOTIFICATION_COMMON  string
+	PAYMENT_COMMON       string
+	PAYMENT_ADMIN_COMMON string
 }
 
 var cfg Config
 
-func InitConfig() {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal("dir fetch error")
-	}
-
-	fmt.Println("Current working dir is : ", dir)
-
-	exDir := filepath.Dir(dir)
-	fmt.Println("Current exdir is : ", exDir)
-
-	viper.SetConfigName(".env")
-	viper.AddConfigPath("")
+func InitConfig() (*Config, error) {
+	viper.SetConfigFile(".env")
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err.Error())
+		return &Config{}, err
 	}
 
 	if err := viper.Unmarshal(&cfg); err != nil {
-		fmt.Println(err)
+		return &Config{}, err
 	}
+
+	return &cfg, nil
 }
 
 func GetConfig() *Config {
