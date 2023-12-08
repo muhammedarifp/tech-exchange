@@ -20,7 +20,7 @@ package di
 // 		repository.NewUserPaymentRepo,
 
 // 		// usecase
-// 		usecase.NewAdminPaymentsUsecase,
+// 		usecase.NewAdminPaymentsUsecase,	
 // 		usecase.NewUserPaymentUsecase,
 
 // 		// handlers
