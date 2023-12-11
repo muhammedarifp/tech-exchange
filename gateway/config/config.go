@@ -16,6 +16,7 @@ type Config struct {
 	NOTIFICATION_COMMON  string
 	PAYMENT_COMMON       string
 	PAYMENT_ADMIN_COMMON string
+	JWT_SECRET           string
 }
 
 var cfg Config

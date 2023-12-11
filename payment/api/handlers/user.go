@@ -15,7 +15,9 @@ func NewUserPaymentHandler(usecase interfaces.UserPaymentUsecase) *UserPaymentHa
 	}
 }
 
-func (a *UserPaymentHandler) FetchPlans(c *gin.Context)         {}
-func (a *UserPaymentHandler) CreateSubscription(c *gin.Context) {}
+func (a *UserPaymentHandler) FetchPlans(c *gin.Context) {}
+func (a *UserPaymentHandler) CreateSubscription(c *gin.Context) {
+	a.usecase.CreateSubscription()
+}
 func (a *UserPaymentHandler) CancelSubscription(c *gin.Context) {}
 func (a *UserPaymentHandler) ChangePlan(c *gin.Context)         {}

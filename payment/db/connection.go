@@ -15,6 +15,7 @@ func ConnectDatabase() (*gorm.DB, error) {
 	}
 
 	if err := db.AutoMigrate(
+		domain.RazorpayAccount{},
 		domain.Plans{},
 		domain.Subscription{},
 		domain.Payment{},

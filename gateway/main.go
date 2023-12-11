@@ -41,7 +41,6 @@ func main() {
 	http.HandleFunc(cfg_pub.PAYMENT_ADMIN_COMMON, reverseProxy(cfg_pub.PAYMENT_SERVICE))
 
 	// Run server
-	fmt.Println("Startingggg.")
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -63,3 +62,9 @@ func reverseProxy(target string) http.HandlerFunc {
 		// return nil
 	}
 }
+
+// func authUserEndpoints(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+// 	})
+// }
