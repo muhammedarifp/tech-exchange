@@ -13,10 +13,6 @@ func NewServeHTTP(user *handlers.UserPaymentHandler, admin *handlers.AdminPaymen
 	engine := gin.New()
 	engine.Use(gin.Logger())
 
-	engine.GET("/api/v1/payments/", func(ctx *gin.Context) {
-		ctx.String(200, "Gmmmmmmmmmmmmmmmmmmm")
-	})
-
 	// user routes
 	userAuthRoute := engine.Group("/api/v1/payments")
 	{

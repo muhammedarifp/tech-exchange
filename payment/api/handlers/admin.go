@@ -15,5 +15,7 @@ func NewAdminPaymentHandler(usecase interfaces.AdminPaymentUsecase) *AdminPaymen
 	}
 }
 
-func (a *AdminPaymentHandler) AddPlan(c *gin.Context)    {}
+func (a *AdminPaymentHandler) AddPlan(c *gin.Context) {
+	a.usecase.AddPlan()
+}
 func (a *AdminPaymentHandler) RemovePlan(c *gin.Context) {}

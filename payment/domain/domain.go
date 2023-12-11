@@ -13,6 +13,14 @@ const (
 
 // Defign databse models
 
+type RazorpayAccount struct {
+	ID         uint   `gorm:"primaryKey"`
+	UserID     uint   `gorm:"not null"`
+	RazorpayID string `gorm:"not null"`
+	Phone      string `gorm:"phone"`
+	Email      string `gorm:"email"`
+}
+
 type Plans struct {
 	ID          uint    `gorm:"primaryKey"`
 	PlanID      string  `gorm:"type:varchar(100);uniqueIndex;not null"`
