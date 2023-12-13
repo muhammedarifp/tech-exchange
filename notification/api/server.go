@@ -26,7 +26,7 @@ func NewServeHTTP(notificationHandler *handlers.NotificationsHandler) *ServerHTT
 	go notificationHandler.StoreNotificationOnDatabase()
 
 	// Create a coustom route group
-	notification := app.Group("/api/v1/users/notification")
+	notification := app.Group("/api/v1/notification")
 	{
 		notification.GET("/getall", notificationHandler.GetallNotifications)
 	}

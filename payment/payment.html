@@ -1,0 +1,46 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Subscription</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <button onclick="handleSubscription()">Subscribe</button>
+
+    <script>
+function handleSubscription() {
+  const options = {
+    key: "rzp_test_siCMLqIerLB4yZ",
+    subscription_id: "sub_NAEGHaKCHIDNMJ",
+    name: "Acme Corp.",
+    description: "Monthly Test Plan",
+    image: "/your_logo.png",
+    handler: response => {
+      alert(response.razorpay_payment_id);
+      alert(response.razorpay_subscription_id);
+      alert(response.razorpay_signature);
+    },
+    prefill: {
+      name: "Muhammed arif",
+      email: "muhammedarif0100@gmail.com",
+      contact: "+9137833975",
+    },
+    notes: {
+      note_key_1: "Tea. Earl Grey. Hot",
+      note_key_2: "Make it so.",
+    },
+    theme: {
+      color: "#F37254",
+    },
+  };
+
+  const paymentObject = new Razorpay(options);
+  paymentObject.open();
+}
+    </script>
+</body>
+</html>
