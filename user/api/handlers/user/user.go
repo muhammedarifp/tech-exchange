@@ -205,7 +205,3 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// Write the response to the client.
 	w.Write(jsonVal)
 }
-
-func (u *UserHandler) Test(w http.ResponseWriter, r *http.Request) {
-
-}

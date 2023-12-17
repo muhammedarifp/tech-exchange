@@ -94,5 +94,34 @@ func (a *UserPaymentHandler) CreateSubscription(c *gin.Context) {
 		Errors:     nil,
 	})
 }
-func (a *UserPaymentHandler) CancelSubscription(c *gin.Context) {}
-func (a *UserPaymentHandler) ChangePlan(c *gin.Context)         {}
+func (a *UserPaymentHandler) CancelSubscription(c *gin.Context) {
+	subid := c.Query("subscription")
+	if subid == "" {
+		c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "invalid subscription id",
+			Data:       nil,
+			Errors:     "invalid id provided",
+		})
+		return
+	}
+
+	resp, repoErr := a.usecase.CancelSubscription(subid)
+	if repoErr != nil {
+		c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     repoErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, response.Response{
+		StatusCode: 200,
+		Message:    "success",
+		Data:       resp,
+		Errors:     nil,
+	})
+}
+func (a *UserPaymentHandler) ChangePlan(c *gin.Context) {}

@@ -25,3 +25,13 @@ func ConnectDatabase() (*gorm.DB, error) {
 
 	return db, nil
 }
+
+func Temp() *gorm.DB {
+	dsn := "user=arifu password=arifu dbname=users port=5432 sslmode=disable TimeZone=Asia/Taipei"
+	db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if dbErr != nil {
+		return nil
+	}
+
+	return db
+}

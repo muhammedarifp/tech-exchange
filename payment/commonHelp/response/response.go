@@ -1,5 +1,7 @@
 package response
 
+import "time"
+
 type Response struct {
 	StatusCode int         `json:"statuscode"`
 	Message    string      `json:"message"`
@@ -15,10 +17,10 @@ type Account struct {
 }
 
 type Subscription struct {
-	SubscriptionID string `json:"subscription_id"`
-	CostemerID     string `json:"customer_id"`
-	PlanID         string `json:"plan_id"`
-	Status         string `json:"status"`
-	StartingDate   string `json:"starting_date"`
-	NextDate       string `json:"next_billing_date"`
+	SubscriptionID string    `json:"subscription_id"`
+	CostemerID     string    `json:"customer_id"`
+	PlanID         string    `json:"plan_id"`
+	Status         string    `json:"status"`
+	StartingDate   time.Time `json:"starting_date"`
+	NextDate       time.Time `json:"next_billing_date"`
 }

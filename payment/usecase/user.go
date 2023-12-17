@@ -3,17 +3,20 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"strconv"
+	"time"
 
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/funcs"
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/msgs"
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/request"
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/response"
+	"github.com/muhammedarifp/tech-exchange/payments/config"
 	"github.com/muhammedarifp/tech-exchange/payments/rabbitmq"
 	"github.com/muhammedarifp/tech-exchange/payments/repository/interfaces"
 	usecase "github.com/muhammedarifp/tech-exchange/payments/usecase/interfaces"
+	"github.com/razorpay/razorpay-go"
 )
 
 type userPaymentUsecase struct {
@@ -29,64 +32,76 @@ func NewUserPaymentUsecase(repo interfaces.UserPaymentRepo) usecase.UserPaymentU
 func (u *userPaymentUsecase) FetchAllPlans() {}
 
 func (u *userPaymentUsecase) CreateSubscription(userid uint, request request.CreateSubscriptionReq) (response.Subscription, error) {
-	// cfg := config.GetConfig()
+	cfg := config.GetConfig()
 
-	// account, accountErr := u.repo.FetchRazorpayAccount(userid)
-	// if accountErr != nil {
-	// 	return response.Subscription{}, accountErr
-	// }
+	account, accountErr := u.repo.FetchRazorpayAccount(userid)
+	if accountErr != nil {
+		return response.Subscription{}, accountErr
+	}
+	if account.UserID == 0 {
+		return response.Subscription{}, errors.New("User account not found")
+	}
 
-	// if account.RazorpayID == "" {
-	// 	funcs.CreateAccount(userid,)
-	// }
+	fmt.Println("account : ", account)
 
-	// client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
-	// data := map[string]interface{}{
-	// 	"plan_id":         request.PlanID,
-	// 	"total_count":     24,
-	// 	"customer_id":     account.RazorpayID,
-	// 	"quantity":        1,
-	// 	"customer_notify": 1,
-	// 	"addons": []interface{}{
-	// 		map[string]interface{}{
-	// 			"item": map[string]interface{}{
-	// 				"name":     "Premium",
-	// 				"amount":   6000,
-	// 				"currency": "INR",
-	// 			},
-	// 		},
-	// 	},
-	// }
+	client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
+	data := map[string]interface{}{
+		"plan_id":         request.PlanID,
+		"total_count":     24,
+		"customer_id":     account.RazorpayID,
+		"quantity":        1,
+		"customer_notify": 1,
+		"addons": []interface{}{
+			map[string]interface{}{
+				"item": map[string]interface{}{
+					"name":     "Premium",
+					"amount":   6000,
+					"currency": "INR",
+				},
+			},
+		},
+	}
 
-	// sub, subErr := client.Subscription.Create(data, nil)
-	// if subErr != nil {
-	// 	return response.Subscription{}, subErr
-	// }
+	sub, subErr := client.Subscription.Create(data, nil)
+	if subErr != nil {
+		return response.Subscription{}, subErr
+	}
 
-	// fmt.Println("sssssssssssssssssssssuuuuuuuuuuuuuuuuuuuuuuu", sub)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	subscription, repoErr := u.repo.CreateSubscription(ctx, sub)
+	if repoErr != nil {
+		return subscription, repoErr
+	}
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*40)
-	// defer cancel()
-	// subscription, repoErr := u.repo.CreateSubscription(ctx, sub)
-	// if repoErr != nil {
-	// 	return subscription, repoErr
-	// }
-
-	// return subscription, repoErr
-
-	return response.Subscription{}, nil
+	return subscription, repoErr
+	// return response.Subscription{}, nil
 }
 
-func (u *userPaymentUsecase) CancelSubscription() {}
-func (u *userPaymentUsecase) ChangePlan()         {}
+func (u *userPaymentUsecase) CancelSubscription(subid string) (response.Subscription, error) {
+	//cfg := config.GetConfig()
+	//client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
+	// _, err := client.Subscription.Cancel(subid, nil, nil)
+	// if err != nil {
+	// 	return response.Subscription{}, err
+	// }
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	subsc, repoErr := u.repo.CancelSubscription(ctx, subid)
+	if repoErr != nil {
+		return response.Subscription{}, repoErr
+	}
+
+	return subsc, nil
+}
+func (u *userPaymentUsecase) ChangePlan() {}
 
 func StartMessageServer() {
 	u := userPaymentUsecase{}
-	u.CreatePaymentAccount(0)
+	u.CreatePaymentAccount()
 }
 
-func (u *userPaymentUsecase) CreatePaymentAccount(userid uint) {
-	//cfg := config.GetConfig()
+func (u *userPaymentUsecase) CreatePaymentAccount() {
 	mqconn, mqErr := rabbitmq.CreateRabbitMqConnection()
 	if mqErr != nil {
 		log.Fatal("Failed to establish connection")
@@ -111,17 +126,43 @@ func (u *userPaymentUsecase) CreatePaymentAccount(userid uint) {
 		for msg := range messages {
 			req := msgs.PaymentAccount{}
 			if err := json.Unmarshal(msg.Body, &req); err != nil {
-				log.Fatal(err)
+				fmt.Println(".............................", err.Error())
 			}
 
 			fmt.Println(string(msg.Body))
 
-			accountVal, err := funcs.CreateAccount(req.UserID, req.Email, req.Name)
+			accountVal, err := funcs.CreateAccount(req.Email, req.Name)
 			if err != nil {
 				fmt.Println(err)
+				return
 			}
-			useridInt, _ := strconv.Atoi(req.UserID)
-			u.repo.CreateRazorpayAccount(context.Background(), uint(useridInt), accountVal)
+
+			u.repo.CreateRazorpayAccount(context.Background(), req.UserID, accountVal)
 		}
 	}()
+
+	select {}
 }
+
+// func (r *userPaymentUsecase) Alllll() {
+// 	optional := map[string]interface{}{
+// 		"count": 10,
+// 	}
+// 	cfg := config.GetConfig()
+// 	client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
+// 	body, err := client.Customer.All(optional, nil)
+// 	if err != nil {
+// 		return
+// 	}
+// 	var c msgs.Collection
+// 	marshelData, errr := json.Marshal(body)
+// 	if errr != nil {
+// 		log.Fatal(errr)
+// 	}
+
+// 	if err := json.Unmarshal(marshelData, &c); err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	repository.Temparory(c)
+// }

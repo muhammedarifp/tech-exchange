@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/response"
 	"github.com/muhammedarifp/tech-exchange/payments/repository/interfaces"
@@ -14,7 +16,12 @@ type userPaymentDb struct {
 	db *gorm.DB
 }
 
+var (
+	databaseb *gorm.DB
+)
+
 func NewUserPaymentRepo(db *gorm.DB) interfaces.UserPaymentRepo {
+	databaseb = db
 	return &userPaymentDb{
 		db: db,
 	}
@@ -25,14 +32,24 @@ func (d *userPaymentDb) FetchAllPlans(ctx context.Context) {}
 
 // Create subscription
 func (d *userPaymentDb) CreateSubscription(ctx context.Context, subsc map[string]interface{}) (response.Subscription, error) {
-	// qury := `INSERT INTO subscriptions (subscription_id,customer_id,plan_id,status,starting_date,next_billing_date) VALUES ($1,$2,$3,$4,$5,$6)`
-	// d.db.Raw(qury, "", "", "", "active", time.Now(), time.Now().AddDate(0, 0, 30))
-	fmt.Println(subsc)
-	return response.Subscription{}, nil
+	qury := `INSERT INTO subscriptions (subscription_id,customer_id,plan_id,status,starting_date,next_billing_date) VALUES ($1,$2,$3,$4,$5,$6)`
+	var resp response.Subscription
+	if err := d.db.Raw(qury, subsc["id"].(string), subsc["customer_id"].(string), subsc["plan_id"].(string), subsc["status"].(string), time.Now(), time.Now().AddDate(0, 0, 30)).Scan(resp).Error; err != nil {
+		return response.Subscription{}, err
+	}
+	return resp, nil
 }
 
 // Cancel
-func (d *userPaymentDb) CancelSubscription(ctx context.Context) {}
+func (d *userPaymentDb) CancelSubscription(ctx context.Context, subid string) (response.Subscription, error) {
+	qury := `UPDATE subscriptions SET status = 'cancelled' WHERE subscription_id = $1`
+	var subData response.Subscription
+	if err := d.db.Raw(qury, subid).Scan(&subData).Error; err != nil {
+		return response.Subscription{}, err
+	}
+
+	return subData, nil
+}
 
 // Change Plan
 func (d *userPaymentDb) ChangePlan(ctx context.Context) {}
@@ -49,20 +66,12 @@ func (d *userPaymentDb) CreateRazorpayAccount(ctxrazorpay_id context.Context, us
 }
 
 func (d *userPaymentDb) FetchRazorpayAccount(userid uint) (response.Account, error) {
+	useridStr := strconv.Itoa(int(userid))
 	qury := `SELECT * FROM razorpay_accounts WHERE user_id = ?`
 	accountData := response.Account{}
-	if err := d.db.Raw(qury, userid).Scan(&accountData).Error; err != nil {
+	if err := d.db.Raw(qury, useridStr).Scan(&accountData).Error; err != nil {
 		return response.Account{}, err
 	}
 
 	return accountData, nil
 }
-
-// func (d *userPaymentDb) CreatePaymentAccount(userid, costemerid string, msgs msgs.PaymentAccount) bool {
-// 	qury := `SELECT * FROM razorpay_accounts (user_id,razorpay_id,email) VALUES ($1,$2,$3,$4)`
-// 	if err := d.db.Raw(qury, userid, costemerid, msgs.Email).Error; err != nil {
-// 		return false
-// 	}
-
-// 	return true
-// }

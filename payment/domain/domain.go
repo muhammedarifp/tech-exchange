@@ -15,7 +15,7 @@ const (
 
 type RazorpayAccount struct {
 	ID         uint   `gorm:"primaryKey"`
-	UserID     uint   `gorm:"not null"`
+	UserID     uint   `gorm:"not null;unique"`
 	RazorpayID string `gorm:"not null"`
 	Email      string `gorm:"email"`
 }
@@ -34,7 +34,7 @@ type Plans struct {
 type Subscription struct {
 	ID              uint      `gorm:"primaryKey"`
 	SubscriptionID  string    `gorm:"type:varchar(100);uniqueIndex;not null"`
-	CustomerID      uint      `gorm:"not null"`
+	CustomerID      string    `gorm:"not null"`
 	PlanID          string    `gorm:"type:varchar(100);not null"`
 	Status          string    `gorm:"type:varchar(50);not null"`
 	StartingDate    time.Time `gorm:"default:CURRENT_TIMESTAMP"`

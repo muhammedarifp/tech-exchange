@@ -9,7 +9,7 @@ import (
 type UserPaymentRepo interface {
 	FetchAllPlans(ctx context.Context)
 	CreateSubscription(ctx context.Context, subsc map[string]interface{}) (response.Subscription, error)
-	CancelSubscription(ctx context.Context)
+	CancelSubscription(ctx context.Context, subid string) (response.Subscription, error)
 	ChangePlan(ctx context.Context)
 	CreateRazorpayAccount(ctx context.Context, userid uint, account map[string]interface{})
 	FetchRazorpayAccount(userid uint) (response.Account, error)

@@ -124,8 +124,6 @@ func (u *userUseCase) UserEmailVerify(unique, otp string) (response.UserValue, e
 		}); err != nil {
 			log.Fatal("Failed to publish message")
 		}
-
-		fmt.Println("Sended..!")
 		return userVal, nil
 	} else {
 		return response.UserValue{}, errors.New("invalid OTP provided")

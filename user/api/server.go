@@ -36,7 +36,7 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 	adminRouter := engine.PathPrefix("/api/v1/users/admins").Subrouter()
 
 	// User endpoints
-	userRouter.HandleFunc("/test", userHandler.Test)
+	//userRouter.HandleFunc("/test", userHandler.Test)
 	userRouter.HandleFunc("/signup", userHandler.Signup).Methods("POST")
 	userRouter.HandleFunc("/login", userHandler.Login).Methods("POST")
 	userRouter.HandleFunc("/otp/send", userHandler.RequestOtp).Methods("POST")
