@@ -4,5 +4,6 @@ use (
 	./content
 	./gateway
 	./notification
+	./payment
 	./user
 )
