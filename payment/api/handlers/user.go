@@ -24,7 +24,45 @@ func NewUserPaymentHandler(usecase interfaces.UserPaymentUsecase) *UserPaymentHa
 	}
 }
 
-func (a *UserPaymentHandler) FetchPlans(c *gin.Context) {}
+func (a *UserPaymentHandler) FetchPlans(c *gin.Context) {
+	page := c.Query("page")
+	if page == "" {
+		c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     "invalid page number",
+		})
+		return
+	}
+	pageInt, convErr := strconv.Atoi(page)
+	if convErr != nil {
+		c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     "invalid page number",
+		})
+		return
+	}
+	plans, err := a.usecase.FetchAllPlans(pageInt)
+	if err != nil {
+		c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     err,
+		})
+		return
+	}
+
+	c.JSON(200, response.Response{
+		StatusCode: 200,
+		Message:    "Success",
+		Data:       plans,
+		Errors:     nil,
+	})
+}
 
 // Create subscription handler
 func (a *UserPaymentHandler) CreateSubscription(c *gin.Context) {

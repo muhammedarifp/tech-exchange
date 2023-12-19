@@ -7,7 +7,7 @@ import (
 )
 
 type UserPaymentRepo interface {
-	FetchAllPlans(ctx context.Context)
+	FetchAllPlans(ctx context.Context, page int) ([]response.Plans, error)
 	CreateSubscription(ctx context.Context, subsc map[string]interface{}) (response.Subscription, error)
 	CancelSubscription(ctx context.Context, subid string) (response.Subscription, error)
 	ChangePlan(ctx context.Context)

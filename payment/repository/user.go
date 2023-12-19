@@ -28,7 +28,16 @@ func NewUserPaymentRepo(db *gorm.DB) interfaces.UserPaymentRepo {
 }
 
 // Fetch all plans
-func (d *userPaymentDb) FetchAllPlans(ctx context.Context) {}
+func (d *userPaymentDb) FetchAllPlans(ctx context.Context, page int) ([]response.Plans, error) {
+	offset := (page - 1) * 10
+	qury := `SELECT * FROM plans WHERE is_active = true OFFSET $1 LIMIT $2`
+	data := []response.Plans{}
+	if err := d.db.Raw(qury, offset, 10).Scan(&data).Error; err != nil {
+		return []response.Plans{}, err
+	}
+
+	return data, nil
+}
 
 // Create subscription
 func (d *userPaymentDb) CreateSubscription(ctx context.Context, subsc map[string]interface{}) (response.Subscription, error) {

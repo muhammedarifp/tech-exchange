@@ -29,7 +29,30 @@ func NewUserPaymentUsecase(repo interfaces.UserPaymentRepo) usecase.UserPaymentU
 	}
 }
 
-func (u *userPaymentUsecase) FetchAllPlans() {}
+func (u *userPaymentUsecase) FetchAllPlans(page int) ([]response.Plans, error) {
+	// cfg := config.GetConfig()
+	// client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
+	// offset := (page - 1) * 10
+	// options := map[string]interface{}{
+	// 	"count": 10,
+	// 	"skip":  offset,
+	// }
+	// plans, planErr := client.Plan.All(options, nil)
+	// if planErr != nil {
+	// 	fmt.Println("Error found :  ", planErr)
+	// 	return map[string]interface{}{}, planErr
+	// }
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	plans, repoErr := u.repo.FetchAllPlans(ctx, page)
+
+	if repoErr != nil {
+		return []response.Plans{}, repoErr
+	}
+
+	return plans, nil
+}
 
 func (u *userPaymentUsecase) CreateSubscription(userid uint, request request.CreateSubscriptionReq) (response.Subscription, error) {
 	cfg := config.GetConfig()
@@ -79,12 +102,12 @@ func (u *userPaymentUsecase) CreateSubscription(userid uint, request request.Cre
 }
 
 func (u *userPaymentUsecase) CancelSubscription(subid string) (response.Subscription, error) {
-	//cfg := config.GetConfig()
-	//client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
-	// _, err := client.Subscription.Cancel(subid, nil, nil)
-	// if err != nil {
-	// 	return response.Subscription{}, err
-	// }
+	cfg := config.GetConfig()
+	client := razorpay.NewClient(cfg.RAZORPAY_KEY, cfg.RAZORPAY_SEC)
+	_, err := client.Subscription.Cancel(subid, nil, nil)
+	if err != nil {
+		return response.Subscription{}, err
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	subsc, repoErr := u.repo.CancelSubscription(ctx, subid)
@@ -94,6 +117,7 @@ func (u *userPaymentUsecase) CancelSubscription(subid string) (response.Subscrip
 
 	return subsc, nil
 }
+
 func (u *userPaymentUsecase) ChangePlan() {}
 
 func StartMessageServer() {

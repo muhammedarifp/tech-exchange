@@ -6,7 +6,7 @@ import (
 )
 
 type UserPaymentUsecase interface {
-	FetchAllPlans()
+	FetchAllPlans(page int) ([]response.Plans, error)
 	CreateSubscription(userid uint, request request.CreateSubscriptionReq) (response.Subscription, error)
 	CancelSubscription(subid string) (response.Subscription, error)
 	ChangePlan()

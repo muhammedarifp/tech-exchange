@@ -24,3 +24,15 @@ type Subscription struct {
 	StartingDate   time.Time `json:"starting_date"`
 	NextDate       time.Time `json:"next_billing_date"`
 }
+
+// Plans Response
+type Plans struct {
+	ID          uint    `json:"id"`
+	PlanID      string  `json:"plan_id" gorm:"plan_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Interval    int     `json:"interval"`
+	Period      string  `json:"period"`
+	Amount      float64 `json:"amount"`
+	IsActive    bool    `json:"is_active"`
+}

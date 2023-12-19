@@ -19,8 +19,8 @@ func NewServeHTTP(user *handlers.UserPaymentHandler, admin *handlers.AdminPaymen
 	{
 		userAuthRoute.GET("/fetchplans", user.FetchPlans)
 		userAuthRoute.POST("/create-subsc", user.CreateSubscription)
-		userAuthRoute.PUT("/change-plan", user.ChangePlan)
 		userAuthRoute.DELETE("/cancel-subsc", user.CancelSubscription)
+		//userAuthRoute.PUT("/change-plan", user.ChangePlan)
 	}
 
 	// admin routes
