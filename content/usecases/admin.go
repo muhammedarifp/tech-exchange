@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/muhammedarifp/content/domain"
@@ -44,4 +45,20 @@ func (c *AdminContentUsecase) RemovePost(postid, userid string) (domain.Contents
 	}
 
 	return content, repoErr
+}
+
+func (c *AdminContentUsecase) CreateNewTag(tag string) (domain.Tags, error) {
+	tag = strings.ToLower(tag)
+	if tag == "" {
+		return domain.Tags{}, errors.New("input value is incorrect")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	defer cancel()
+	newTag, err := c.repo.AddNewTag(ctx, tag)
+	if err != nil {
+		return domain.Tags{}, err
+	}
+
+	return newTag, nil
 }

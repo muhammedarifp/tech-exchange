@@ -14,4 +14,10 @@ type ContentUserUsecase interface {
 	RemovePost(postid, userid string) (domain.Contents, error)
 	GetUserPosts(userid string, page int) ([]domain.Contents, error)
 	GetallPosts(page int) ([]domain.Contents, error)
+
+	//
+	FollowTag(userid string, req requests.FollowTagReq) (domain.Interests, error)
+	FetchRecomentedPosts(userid string) ([]domain.Contents, error)
+	FetchAllTags() ([]domain.Tags, error)
+	GetOnePost(postid string) (domain.Contents, error)
 }

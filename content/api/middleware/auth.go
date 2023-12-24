@@ -25,7 +25,15 @@ func AuthMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
-		req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/users/account", nil)
+		req, userErr := http.NewRequest("GET", "http://localhost:8080/api/v1/users/account", nil)
+		if userErr != nil {
+			return c.JSON(400, response.Response{
+				StatusCode: 400,
+				Message:    "1unautheraized user",
+				Data:       nil,
+				Errors:     userErr.Error(),
+			})
+		}
 		req.Header.Set("Token", token)
 		client := http.Client{}
 		user, user_err := client.Do(req)

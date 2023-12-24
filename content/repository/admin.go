@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/muhammedarifp/content/config"
 	"github.com/muhammedarifp/content/domain"
@@ -82,4 +83,25 @@ func (d *AdminContentRepository) RemovePost(ctx context.Context, postID, userID 
 	}
 
 	return content, nil
+}
+
+func (d *AdminContentRepository) AddNewTag(ctx context.Context, tag string) (domain.Tags, error) {
+	cfg := config.GetConfig()
+
+	newTag := domain.Tags{
+		ID:       primitive.NewObjectID(),
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
+		Tag:      tag,
+		Posts:    []primitive.ObjectID{},
+		IsActive: true,
+	}
+
+	_, err := d.db.Database(cfg.DB_NAME).Collection("tags").InsertOne(ctx, newTag)
+	if err != nil {
+		log.Fatal(err.Error())
+		return domain.Tags{}, err
+	}
+
+	return newTag, nil
 }

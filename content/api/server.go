@@ -29,9 +29,18 @@ func NewServeHTTP(userHandler *userhandlers.ContentUserHandler, adminHandler *ad
 	userAuth.DELETE("/delete", userHandler.DeleteContent)
 	userAuth.GET("/getown", userHandler.GetUserContents)
 	userAuth.GET("/getall", userHandler.GetallPosts)
+	userAuth.GET("/getone", userHandler.GetOnePost)
+	userAuth.GET("/get-recomented", userHandler.FetchRecomentedContents)
+	userAuth.POST("/follow-tag", userHandler.FollowTag)
+	userAuth.GET("/getall-tags", userHandler.Getalltags)
 
 	adminAuth.GET("/getall", adminHandler.GetallPosts)
+
+	// Not done
 	adminAuth.DELETE("/delete", adminHandler.DeleteContent)
+
+	//Done
+	adminAuth.POST("/create-tag", adminHandler.AddNewTag)
 
 	return &ServerHTTP{echo: e}
 }

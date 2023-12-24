@@ -9,4 +9,5 @@ import (
 type AdminContentRepo interface {
 	GetallPosts(ctx context.Context, page int) ([]domain.Contents, error)
 	RemovePost(ctx context.Context, postid, userid string) (domain.Contents, error)
+	AddNewTag(ctx context.Context, tag string) (domain.Tags, error)
 }

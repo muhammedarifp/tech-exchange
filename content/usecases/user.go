@@ -157,3 +157,53 @@ func (u *ContentUserUsecase) GetallPosts(page int) ([]domain.Contents, error) {
 
 	return posts, nil
 }
+
+func (u *ContentUserUsecase) FollowTag(userid string, req requests.FollowTagReq) (domain.Interests, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	repoRes, repoErr := u.userRepo.FollowTag(ctx, userid, req)
+	if repoErr != nil {
+		return repoRes, repoErr
+	}
+
+	return repoRes, repoErr
+}
+
+func (u *ContentUserUsecase) FetchRecomentedPosts(userid string) ([]domain.Contents, error) {
+	useridInt, convErr := strconv.Atoi(userid)
+	if convErr != nil {
+		return []domain.Contents{}, convErr
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*6)
+	defer cancel()
+	posts, repoErr := u.userRepo.FetchRecommendedPosts(ctx, int64(useridInt))
+	if repoErr != nil {
+		return []domain.Contents{}, repoErr
+	}
+
+	return posts, nil
+}
+
+func (u *ContentUserUsecase) FetchAllTags() ([]domain.Tags, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	tags, repoErr := u.userRepo.FetchAllTags(ctx)
+	if repoErr != nil {
+		return []domain.Tags{}, repoErr
+	}
+
+	return tags, nil
+}
+
+func (u *ContentUserUsecase) GetOnePost(postid string) (domain.Contents, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	post, repoErr := u.userRepo.GetOnePost(ctx, postid)
+	if repoErr != nil {
+		return domain.Contents{}, repoErr
+	}
+
+	return post, nil
+}

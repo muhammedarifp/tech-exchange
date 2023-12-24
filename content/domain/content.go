@@ -19,6 +19,7 @@ type Contents struct {
 	IsPremium       bool               `bson:"is_premium" json:"is_premium"`
 	Comments        []Comment          `bson:"comments" json:"comments"`
 	Reactions       []Reaction         `json:"reactions" bson:"reactions"`
+	Labels          []string           `json:"labels" json:"labels"`
 	IsActive        bool               `json:"is_active" bson:"is_active"`
 }
 
