@@ -38,26 +38,39 @@ func NewContentUserHandler(usecase interfaces.ContentUserUsecase) *ContentUserHa
 func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 	userid := jwt.GetuseridFromJwt(c.Request().Header.Get("Token"))
 	if userid == "" {
-		fmt.Println("Userid is nill")
-		return nil
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "input value is invalid .. ",
+			Data:       nil,
+			Errors:     "invalid input value",
+		})
 	}
 
 	userBody, bodyErr := io.ReadAll(c.Request().Body)
 	if bodyErr != nil {
-		fmt.Println("Body errrr")
-		return nil
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "body read error .. ",
+			Data:       nil,
+			Errors:     bodyErr.Error(),
+		})
 	}
 
 	var userPost requests.CreateNewPostRequest
 	if err := json.Unmarshal(userBody, &userPost); err != nil {
-		return c.String(400, err.Error())
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "failure . .",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
 	}
 
 	val, err := u.usecase.CreatePost(userid, userPost)
 	if err != nil {
 		return c.JSON(400, response.Response{
 			StatusCode: 400,
-			Message:    "failure",
+			Message:    "failure . .",
 			Data:       nil,
 			Errors:     err.Error(),
 		})
@@ -65,7 +78,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 
 	return c.JSON(200, response.Response{
 		StatusCode: 200,
-		Message:    "success",
+		Message:    "success .. ",
 		Data:       val,
 		Errors:     nil,
 	})
@@ -321,4 +334,74 @@ func (h *ContentUserHandler) GetallPosts(c echo.Context) error {
 	}
 
 	return c.JSON(200, posts)
+}
+
+func (h *ContentUserHandler) FetchRecomentedContents(c echo.Context) error {
+	token := c.Request().Header.Get("Token")
+	userid := jwt.GetuseridFromJwt(token)
+	if userid == "" {
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "invalid auth token",
+			Data:       nil,
+			Errors:     "invalid input",
+		})
+	}
+
+	posts, err := h.usecase.FetchRecomentedPosts(userid)
+	if err != nil {
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
+	}
+
+	return c.JSON(200, response.Response{
+		StatusCode: 200,
+		Message:    "Success",
+		Data:       posts,
+		Errors:     nil,
+	})
+}
+
+func (h *ContentUserHandler) GetOnePost(c echo.Context) error {
+	token := c.Request().Header.Get("Token")
+	userid := jwt.GetuseridFromJwt(token)
+	if userid == "" {
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "invalid auth token",
+			Data:       nil,
+			Errors:     "invalid input",
+		})
+	}
+
+	postid := c.QueryParam("postid")
+	if postid == "" {
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "invalid postid",
+			Data:       nil,
+			Errors:     "invalid input",
+		})
+	}
+
+	post, err := h.usecase.GetOnePost(postid)
+	if err != nil {
+		return c.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "internal server error",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
+	}
+
+	return c.JSON(200, response.Response{
+		StatusCode: 200,
+		Message:    "Success",
+		Data:       post,
+		Errors:     nil,
+	})
 }
