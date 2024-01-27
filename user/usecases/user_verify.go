@@ -5,16 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/muhammedarifp/user/commonhelp/cache"
 	"github.com/muhammedarifp/user/commonhelp/helperfuncs"
-	"github.com/muhammedarifp/user/commonhelp/msgs"
 	"github.com/muhammedarifp/user/commonhelp/response"
 	"github.com/muhammedarifp/user/config"
 	"github.com/muhammedarifp/user/db"
-	"github.com/muhammedarifp/user/rabbitmq"
-	"github.com/rabbitmq/amqp091-go"
 )
 
 func (u *userUseCase) UserEmailVerificationSend(unique string) (bool, error) {
@@ -91,38 +87,6 @@ func (u *userUseCase) UserEmailVerify(unique, otp string) (response.UserValue, e
 		userVal, repoErr := u.userRepo.CreateNewUser(cacheVal)
 		if repoErr != nil {
 			return response.UserValue{}, repoErr
-		}
-
-		// Return the created user value and nil error, indicating successful user creation
-		conn, connErr := rabbitmq.NewRabbitmqConnection()
-		if connErr != nil {
-			log.Fatal("Failed to establish connection")
-		}
-
-		ch, chErr := conn.Channel()
-		if chErr != nil {
-			log.Fatal("Failed to open channel")
-		}
-
-		queue, queErr := ch.QueueDeclare("payment_acc", true, false, false, false, nil)
-		if queErr != nil {
-			log.Fatal(queErr.Error())
-		}
-
-		msg := msgs.PaymentAccount{
-			UserID: userVal.ID,
-
-			Email: userVal.Email,
-			Name:  userVal.Username,
-		}
-
-		msgByte, _ := json.Marshal(msg)
-
-		if err := ch.PublishWithContext(context.Background(), "", queue.Name, false, false, amqp091.Publishing{
-			ContentType: "application/json",
-			Body:        msgByte,
-		}); err != nil {
-			log.Fatal("Failed to publish message")
 		}
 		return userVal, nil
 	} else {

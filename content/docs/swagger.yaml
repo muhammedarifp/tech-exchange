@@ -1,152 +1,16 @@
-definitions:
-  requests.CreateNewPostRequest:
-    properties:
-      body:
-        type: string
-      is_premium:
-        type: boolean
-      is_show_reactions:
-        type: boolean
-      title:
-        type: string
-    type: object
-  response.Response:
-    properties:
-      data: {}
-      error: {}
-      message:
-        type: string
-      statuscode:
-        type: integer
-    type: object
+basePath: /v2
+host: petstore.swagger.io
 info:
-  contact: {}
-paths:
-  /api/v1/contents/comment:
-    post:
-      consumes:
-      - application/json
-      description: add owm comment on any post
-      parameters:
-      - description: User information for signup
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/requests.CreateNewPostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User created success
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Create new comment
-      tags:
-      - Content / User
-  /api/v1/contents/create-post:
-    post:
-      consumes:
-      - application/json
-      description: Signup new user
-      parameters:
-      - description: User information for signup
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/requests.CreateNewPostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User created success
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Create new post
-      tags:
-      - Content / User
-  /api/v1/contents/delete:
-    delete:
-      consumes:
-      - application/json
-      description: Like post
-      parameters:
-      - description: Example parameter
-        in: query
-        name: param
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User created success
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Delete post
-      tags:
-      - Content / User
-  /api/v1/contents/like:
-    post:
-      consumes:
-      - application/json
-      description: Like post
-      parameters:
-      - description: Example parameter
-        in: query
-        name: param
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User created success
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Like post
-      tags:
-      - Content / User
-  /api/v1/contents/update:
-    put:
-      consumes:
-      - application/json
-      description: Like post
-      parameters:
-      - description: Example parameter
-        in: query
-        name: param
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: User created success
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Update content
-      tags:
-      - Content / User
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server Petstore server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths: {}
 swagger: "2.0"

@@ -12,7 +12,7 @@ type UserPaymentRepo interface {
 	CancelSubscription(ctx context.Context, subid string) (response.Subscription, error)
 	ChangePlan(ctx context.Context)
 	CreateRazorpayAccount(ctx context.Context, userid uint, account map[string]interface{})
-	FetchRazorpayAccount(userid uint) (response.Account, error)
+	//FetchRazorpayAccount(userid uint) (response.Account, error)
 }
 
 //

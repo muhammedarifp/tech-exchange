@@ -74,7 +74,15 @@ func (a *AdminPaymentHandler) AddPlan(c *gin.Context) {
 		})
 		return
 	}
+
+	// c.JSON(200, response.Response{
+	// 	StatusCode: 200,
+	// 	Message:    "success",
+	// 	Data:       enterData,
+	// 	Errors:     nil,
+	// })
 }
+
 func (a *AdminPaymentHandler) RemovePlan(c *gin.Context) {
 	planid := c.Query("plan")
 	if planid == "" {

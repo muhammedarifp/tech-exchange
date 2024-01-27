@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHelp"
+	"github.com/muhammedarifp/tech-exchange/notification/commonHelp/jwt"
 	"github.com/muhammedarifp/tech-exchange/notification/rabbitmq"
 	interfaces "github.com/muhammedarifp/tech-exchange/notification/repository/interface"
 	usercaseInterfaces "github.com/muhammedarifp/tech-exchange/notification/usecase/interfaces"
@@ -62,4 +63,10 @@ func (u *notificationUsecase) StoreNotificationsOnDB() {
 		}
 	}()
 
+}
+
+func (u *notificationUsecase) GetAllNotifications(token string) ([]commonhelp.NotificationResp, error) {
+	userid := jwt.GetuseridFromJwt(token)
+	notifications, err := u.repo.GetAllNotifications(userid)
+	return notifications, err
 }

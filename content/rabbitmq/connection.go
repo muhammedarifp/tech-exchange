@@ -13,7 +13,7 @@ func failOnError(err error, msg string) {
 }
 
 func NewRabbitmqConnection() (*amqp.Connection, error) {
-	conn, connErr := amqp.Dial("amqp://localhost:5672")
+	conn, connErr := amqp.Dial("rabbitmq-service:5672")
 	failOnError(connErr, "connection error")
 
 	return conn, nil

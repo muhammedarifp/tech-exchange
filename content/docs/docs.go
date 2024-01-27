@@ -9,249 +9,31 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {
-        "/api/v1/contents/comment": {
-            "post": {
-                "description": "add owm comment on any post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content / User"
-                ],
-                "summary": "Create new comment",
-                "parameters": [
-                    {
-                        "description": "User information for signup",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/requests.CreateNewPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User created success",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/contents/create-post": {
-            "post": {
-                "description": "Signup new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content / User"
-                ],
-                "summary": "Create new post",
-                "parameters": [
-                    {
-                        "description": "User information for signup",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/requests.CreateNewPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User created success",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/contents/delete": {
-            "delete": {
-                "description": "Like post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content / User"
-                ],
-                "summary": "Delete post",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Example parameter",
-                        "name": "param",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User created success",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/contents/like": {
-            "post": {
-                "description": "Like post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content / User"
-                ],
-                "summary": "Like post",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Example parameter",
-                        "name": "param",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User created success",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/contents/update": {
-            "put": {
-                "description": "Like post",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Content / User"
-                ],
-                "summary": "Update content",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Example parameter",
-                        "name": "param",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User created success",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "requests.CreateNewPostRequest": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "is_premium": {
-                    "type": "boolean"
-                },
-                "is_show_reactions": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {},
-                "message": {
-                    "type": "string"
-                },
-                "statuscode": {
-                    "type": "integer"
-                }
-            }
-        }
-    }
+    "paths": {}
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "petstore.swagger.io",
+	BasePath:         "/v2",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Swagger Example API",
+	Description:      "This is a sample server Petstore server.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	_ "github.com/muhammedarifp/tech-exchange/notification/cmd/docs"
+	"github.com/muhammedarifp/content/commonHelp/response"
 	"github.com/muhammedarifp/tech-exchange/notification/usecase/interfaces"
 )
 
@@ -28,7 +28,34 @@ func NewNotificationHandler(usecase interfaces.NotificationUsecase) *Notificatio
 // @Success 200 {array} domain.Notifications
 // @Router /notifications [get]
 func (u *NotificationsHandler) GetallNotifications(ctx *gin.Context) {
-	ctx.String(200, "Iam Okkkkkkkkkkkkkkk!")
+	token := ctx.GetHeader("Token")
+	if token == "" {
+		ctx.JSON(400, response.Response{
+			StatusCode: 404,
+			Message:    "Token not found. Please login first to get token and then try again.",
+			Data:       nil,
+			Errors:     "Token not found",
+		})
+		return
+	}
+
+	resp, err := u.usecase.GetAllNotifications(token)
+	if err != nil {
+		ctx.JSON(400, response.Response{
+			StatusCode: 400,
+			Message:    "Something went wrong",
+			Data:       nil,
+			Errors:     err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, response.Response{
+		StatusCode: 200,
+		Message:    "Success",
+		Data:       resp,
+		Errors:     nil,
+	})
 }
 
 func (u *NotificationsHandler) StoreNotificationOnDatabase() {

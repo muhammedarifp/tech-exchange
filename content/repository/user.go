@@ -444,9 +444,6 @@ func (d *ContentUserDatabase) FetchRecommendedPosts(ctx context.Context, userid 
 		recomentedContentIds = append(recomentedContentIds, currentTag.Posts...)
 	}
 
-	fmt.Println(recomentedContentIds)
-	fmt.Println(len(recomentedContentIds))
-
 	//
 	var recomentedDocs []domain.Contents
 	postFilter := bson.M{"_id": bson.M{"$in": recomentedContentIds}}
@@ -499,7 +496,7 @@ func (d *ContentUserDatabase) GetOnePost(ctx context.Context, postid string) (do
 	filter := bson.M{"_id": objid}
 
 	// fetch user data on user service
-	resp, userErr := http.NewRequest("GET", "http://localhost:8080/api/v1/users/account", nil)
+	resp, userErr := http.NewRequest("GET", "http://muarif.online/api/v1/users/account", nil)
 	if userErr != nil {
 		return domain.Contents{}, userErr
 	}

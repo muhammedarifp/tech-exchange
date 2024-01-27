@@ -34,6 +34,7 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 	userRouter := engine.PathPrefix("/api/v1/users").Subrouter()
 	userAuthRouter := engine.PathPrefix("/api/v1/users").Subrouter()
 	adminRouter := engine.PathPrefix("/api/v1/users/admins").Subrouter()
+	adminAuthRouter := engine.PathPrefix("/api/v1/users/admins").Subrouter()
 
 	// User endpoints
 	//userRouter.HandleFunc("/test", userHandler.Test)
@@ -44,8 +45,12 @@ func NewServerHTTP(userHandler *userhandlers.UserHandler, adminHandler *adminhan
 
 	// Admin endpoints
 	adminRouter.HandleFunc("/login", adminHandler.Login).Methods("POST")
-	adminRouter.HandleFunc("/{userid}/ban", adminHandler.BanUser).Methods("POST")
-	adminRouter.HandleFunc("/{page}/getallusers", adminHandler.GetAllUsers).Methods("GET")
+
+	// Admin authentication routes
+	adminAuthRouter.Use(middleware.AdminAuthMiddleware)
+
+	adminAuthRouter.HandleFunc("/{userid}/ban", adminHandler.BanUser).Methods("POST")
+	adminAuthRouter.HandleFunc("/{page}/getallusers", adminHandler.GetAllUsers).Methods("GET")
 
 	// User authentication routes
 	userAuthRouter.Use(middleware.AuthMiddleware)

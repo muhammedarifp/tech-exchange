@@ -25,7 +25,7 @@ func AuthMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
-		req, userErr := http.NewRequest("GET", "http://localhost:8080/api/v1/users/account", nil)
+		req, userErr := http.NewRequest("GET", "http://muarif.online/api/v1/users/account", nil)
 		if userErr != nil {
 			return c.JSON(400, response.Response{
 				StatusCode: 400,
@@ -40,7 +40,7 @@ func AuthMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 		if user_err != nil {
 			return c.JSON(400, response.Response{
 				StatusCode: 400,
-				Message:    "1unautheraized user",
+				Message:    "",
 				Data:       nil,
 				Errors:     user_err.Error(),
 			})
@@ -55,7 +55,7 @@ func AuthMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 		if err := json.Unmarshal(userValbyte, &userVal); err != nil {
 			return c.JSON(400, response.Response{
 				StatusCode: 400,
-				Message:    "unmarshel error found",
+				Message:    "",
 				Data:       nil,
 				Errors:     err.Error(),
 			})

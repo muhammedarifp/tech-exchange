@@ -1,14 +1,17 @@
 package db
 
 import (
+	"fmt"
+
+	"github.com/muhammedarifp/tech-exchange/payments/config"
 	"github.com/muhammedarifp/tech-exchange/payments/domain"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func ConnectDatabase() (*gorm.DB, error) {
-	dsn := "user=arifu password=arifu dbname=payments port=5432 sslmode=disable TimeZone=Asia/Taipei"
+func ConnectDatabase(c config.Config) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Taipei", c.DB_HOST, c.DB_USER, c.DB_PASSWORD, c.DB_NAME, c.DB_PORT)
 	db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dbErr != nil {
 		return nil, dbErr

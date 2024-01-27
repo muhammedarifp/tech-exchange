@@ -12,6 +12,8 @@ type Config struct {
 	DB_PORT     string
 	APP_PORT    string
 	DB_NAME     string
+	DB_HOST     string
+	JWT_SECRET  string
 }
 
 var (

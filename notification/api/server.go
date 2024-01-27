@@ -3,7 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/muhammedarifp/tech-exchange/notification/api/handlers"
-	_ "github.com/muhammedarifp/tech-exchange/notification/cmd/docs"
+	"github.com/muhammedarifp/tech-exchange/notification/api/middileware"
+
 	"github.com/muhammedarifp/tech-exchange/notification/config"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -26,7 +27,7 @@ func NewServeHTTP(notificationHandler *handlers.NotificationsHandler) *ServerHTT
 	go notificationHandler.StoreNotificationOnDatabase()
 
 	// Create a coustom route group
-	notification := app.Group("/api/v1/notification")
+	notification := app.Group("/api/v1/notification").Use(middileware.AuthMiddleWare())
 	{
 		notification.GET("/getall", notificationHandler.GetallNotifications)
 	}

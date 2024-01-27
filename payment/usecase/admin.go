@@ -31,13 +31,9 @@ func (u *adminPaymentUsecase) AddPlan(enterData request.Plans) (response.Plans, 
 		"interval": enterData.Interval,
 		"item": map[string]interface{}{
 			"name":        enterData.Name,
-			"amount":      enterData.Amount,
+			"amount":      enterData.Amount * 100,
 			"currency":    "INR",
 			"description": enterData.Description,
-		},
-		"notes": map[string]interface{}{
-			"notes_key_1": "Tea, Earl Grey, Hot",
-			"notes_key_2": "Tea, Earl Grey… decaf.",
 		},
 	}
 	plan, planErr := client.Plan.Create(data, nil)

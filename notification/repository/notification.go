@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"sync"
 
 	commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHelp"
@@ -33,4 +34,26 @@ func (d *notificationsDB) StoreNotificationsOnDB(notification commonhelp.Notific
 	}
 
 	return true
+}
+
+func (d *notificationsDB) GetAllNotifications(userid string) ([]commonhelp.NotificationResp, error) {
+	fmt.Println(userid)
+	query := `SELECT * FROM notifications WHERE user_id = $1`
+	var notifications []domain.Notifications
+	err := d.DB.Raw(query, userid).Scan(&notifications).Error
+	if err != nil {
+		return nil, err
+	}
+	var notificationResp []commonhelp.NotificationResp
+	for _, notification := range notifications {
+		notificationResp = append(notificationResp, commonhelp.NotificationResp{
+			UserID:      notification.UserID,
+			Title:       notification.Title,
+			Body:        notification.Body,
+			IsImportent: notification.Is_importent,
+			LikedUserID: notification.LikedUserID,
+		})
+	}
+
+	return notificationResp, nil
 }

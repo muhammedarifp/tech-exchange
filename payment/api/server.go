@@ -20,12 +20,13 @@ func NewServeHTTP(user *handlers.UserPaymentHandler, admin *handlers.AdminPaymen
 		userAuthRoute.GET("/fetchplans", user.FetchPlans)
 		userAuthRoute.POST("/create-subsc", user.CreateSubscription)
 		userAuthRoute.DELETE("/cancel-subsc", user.CancelSubscription)
-		//userAuthRoute.PUT("/change-plan", user.ChangePlan)
+		userAuthRoute.POST("/verify-payment", user.VerifyPayment)
 	}
 
 	// admin routes
-	adminAuthRoute := engine.Group("/api/v1/payments/admin")
+	adminAuthRoute := engine.Group("/api/v1/payments/admin").Use(middleware.AdminAuthMiddleware())
 	{
+		adminAuthRoute.GET("/fetch-plans", user.FetchPlans)
 		adminAuthRoute.POST("/create-plan", admin.AddPlan)
 		adminAuthRoute.DELETE("/remove-plan", admin.RemovePlan)
 	}

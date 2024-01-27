@@ -11,7 +11,7 @@ type RabbitmqConnection struct {
 }
 
 func NewRabbitmqConnection() (*RabbitmqConnection, error) {
-	conn, connErr := amqp.Dial("amqp://localhost:5672")
+	conn, connErr := amqp.Dial("rabbitmq-service:5672")
 	if connErr != nil {
 		log.Fatalf("rabbitmq connection error found : %v", connErr)
 		return &RabbitmqConnection{Connection: nil}, connErr

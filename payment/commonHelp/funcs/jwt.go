@@ -3,7 +3,7 @@ package funcs
 import (
 	"fmt"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt"
 	"github.com/muhammedarifp/tech-exchange/payments/config"
 )
 

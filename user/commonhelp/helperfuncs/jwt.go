@@ -38,3 +38,21 @@ func GetUserIdFromJwt(token string) (string, error) {
 		return userid, nil
 	}
 }
+
+func IsAdmin(token string) bool {
+	cfg := config.GetConfig()
+	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return []byte(cfg.JWT_SECRET), nil
+	})
+
+	if err != nil {
+		return false
+	} else {
+		cliems := parsedToken.Claims.(jwt.MapClaims)
+		is_admin, ok := cliems["is_admin"].(bool)
+		if !ok {
+			return false
+		}
+		return is_admin
+	}
+}

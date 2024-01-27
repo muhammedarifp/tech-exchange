@@ -4,4 +4,5 @@ import commonhelp "github.com/muhammedarifp/tech-exchange/notification/commonHel
 
 type NotificationRepo interface {
 	StoreNotificationsOnDB(notification commonhelp.NotificationResp) bool
+	GetAllNotifications(userid string) ([]commonhelp.NotificationResp, error)
 }

@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/muhammedarifp/content/commonHelp/response"
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/funcs"
 	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/request"
+	"github.com/muhammedarifp/tech-exchange/payments/commonHelp/response"
 	"github.com/muhammedarifp/tech-exchange/payments/usecase/interfaces"
 )
 
@@ -163,3 +163,66 @@ func (a *UserPaymentHandler) CancelSubscription(c *gin.Context) {
 	})
 }
 func (a *UserPaymentHandler) ChangePlan(c *gin.Context) {}
+
+func (a *UserPaymentHandler) VerifyPayment(c *gin.Context) {
+	// token := c.Request.Header.Get("Token")
+	// useridStr := funcs.GetuseridFromJwt(token)
+
+	var userData map[string]interface{}
+
+	body, bodyErr := io.ReadAll(c.Request.Body)
+	if bodyErr != nil {
+		c.JSON(http.StatusBadRequest, response.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid request body. Please provide a valid JSON body.",
+			Data:       nil,
+			Errors:     bodyErr.Error(),
+		})
+		return
+	}
+
+	json.Unmarshal(body, &userData)
+
+	payload, ok1 := userData["payload"].(string)
+	signature, ok2 := userData["signature"].(string)
+
+	if !ok1 || !ok2 {
+		c.JSON(http.StatusBadRequest, response.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid request body. Please provide a valid JSON body.",
+			Data:       nil,
+			Errors:     "Payload or signature is missing",
+		})
+		return
+	}
+
+	if payload == "" || signature == "" {
+		c.JSON(http.StatusBadRequest, response.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Invalid request body. Please provide a valid JSON body.",
+			Data:       nil,
+			Errors:     "Payload or signature is missing",
+		})
+		return
+	}
+
+	_, repoErr := a.usecase.VerifyPayment(payload, signature)
+	if repoErr != nil {
+		c.JSON(http.StatusBadRequest, response.Response{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Internal server error.",
+			Data:       nil,
+			Errors:     repoErr.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, response.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Success",
+		Data:       "Payment verified successfully",
+		Errors:     nil,
+	})
+
+}

@@ -41,9 +41,18 @@ func (d *userPaymentDb) FetchAllPlans(ctx context.Context, page int) ([]response
 
 // Create subscription
 func (d *userPaymentDb) CreateSubscription(ctx context.Context, subsc map[string]interface{}) (response.Subscription, error) {
-	qury := `INSERT INTO subscriptions (subscription_id,customer_id,plan_id,status,starting_date,next_billing_date) VALUES ($1,$2,$3,$4,$5,$6)`
+	qury := `INSERT INTO subscriptions 
+				(
+					subscription_id,
+					customer_id,
+					plan_id,
+					status,
+					starting_date,
+					next_billing_date
+				) VALUES ($1,$2,$3,$4,$5,$6)
+				RETURNING *`
 	var resp response.Subscription
-	if err := d.db.Raw(qury, subsc["id"].(string), subsc["customer_id"].(string), subsc["plan_id"].(string), subsc["status"].(string), time.Now(), time.Now().AddDate(0, 0, 30)).Scan(resp).Error; err != nil {
+	if err := d.db.Raw(qury, subsc["id"].(string), "", subsc["plan_id"].(string), subsc["status"].(string), time.Now(), time.Now().AddDate(0, 0, 30)).Scan(&resp).Error; err != nil {
 		return response.Subscription{}, err
 	}
 	return resp, nil

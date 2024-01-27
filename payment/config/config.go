@@ -8,6 +8,11 @@ import (
 )
 
 type Config struct {
+	DB_USER               string
+	DB_HOST               string
+	DB_NAME               string
+	DB_PASSWORD           string
+	DB_PORT               string
 	APP_PORT              string
 	RAZORPAY_KEY          string
 	RAZORPAY_SEC          string

@@ -35,11 +35,7 @@ func NewServeHTTP(userHandler *userhandlers.ContentUserHandler, adminHandler *ad
 	userAuth.GET("/getall-tags", userHandler.Getalltags)
 
 	adminAuth.GET("/getall", adminHandler.GetallPosts)
-
-	// Not done
 	adminAuth.DELETE("/delete", adminHandler.DeleteContent)
-
-	//Done
 	adminAuth.POST("/create-tag", adminHandler.AddNewTag)
 
 	return &ServerHTTP{echo: e}

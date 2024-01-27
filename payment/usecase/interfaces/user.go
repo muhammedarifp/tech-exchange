@@ -10,5 +10,5 @@ type UserPaymentUsecase interface {
 	CreateSubscription(userid uint, request request.CreateSubscriptionReq) (response.Subscription, error)
 	CancelSubscription(subid string) (response.Subscription, error)
 	ChangePlan()
-	CreatePaymentAccount()
+	VerifyPayment(payload, signature string) (bool, error)
 }

@@ -12,6 +12,7 @@ type UserValue struct {
 	Password    string    `json:"password"`
 	Is_verified bool      `json:"is_verified"`
 	Is_premium  bool      `json:"is_premium"`
+	Is_admin    bool      `json:"is_admin"`
 	Is_banned   bool      `json:"is_banned"`
 	Is_active   bool      `json:"is_active"`
 }

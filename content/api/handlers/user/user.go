@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -40,7 +39,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 	if userid == "" {
 		return c.JSON(400, response.Response{
 			StatusCode: 400,
-			Message:    "input value is invalid .. ",
+			Message:    "invalid auth token",
 			Data:       nil,
 			Errors:     "invalid input value",
 		})
@@ -50,7 +49,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 	if bodyErr != nil {
 		return c.JSON(400, response.Response{
 			StatusCode: 400,
-			Message:    "body read error .. ",
+			Message:    "body read error. we can't read your request body. if this error continue please contact our support team",
 			Data:       nil,
 			Errors:     bodyErr.Error(),
 		})
@@ -60,7 +59,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 	if err := json.Unmarshal(userBody, &userPost); err != nil {
 		return c.JSON(400, response.Response{
 			StatusCode: 400,
-			Message:    "failure . .",
+			Message:    "unmarshal error. we can't read your request body. if this error continue please contact our support team",
 			Data:       nil,
 			Errors:     err.Error(),
 		})
@@ -70,7 +69,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, response.Response{
 			StatusCode: 400,
-			Message:    "failure . .",
+			Message:    "internal server error. try again later. if this error continue please contact our support team",
 			Data:       nil,
 			Errors:     err.Error(),
 		})
@@ -78,7 +77,7 @@ func (u *ContentUserHandler) CreateNewPost(c echo.Context) error {
 
 	return c.JSON(200, response.Response{
 		StatusCode: 200,
-		Message:    "success .. ",
+		Message:    "post created successfully. thank you for your contribution",
 		Data:       val,
 		Errors:     nil,
 	})
@@ -116,9 +115,13 @@ func (u *ContentUserHandler) CreateComment(c echo.Context) error {
 		return c.String(400, "Your comment text is empty, empty comment not allowed !")
 	}
 
-	u.usecase.CreateComment(userid, postid, commentText)
+	post, repoerr := u.usecase.CreateComment(userid, postid, commentText)
 
-	return c.String(200, fmt.Sprintf("postid is %s", postid))
+	if repoerr != nil {
+		return c.String(400, repoerr.Error())
+	}
+
+	return c.JSON(200, post)
 }
 
 // @Summary Like post
